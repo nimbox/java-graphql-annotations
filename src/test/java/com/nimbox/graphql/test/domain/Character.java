@@ -31,7 +31,7 @@ public class Character {
 	}
 
 	@GraphQLQuery(name = "name", description = "The name of the character.")
-	public @GraphQLNonNull String getName() {
+	public String getName() {
 		return name;
 	}
 

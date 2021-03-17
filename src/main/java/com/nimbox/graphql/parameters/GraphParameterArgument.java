@@ -6,9 +6,8 @@ import com.nimbox.graphql.GeneratorException;
 import com.nimbox.graphql.annotations.GraphQLArgument;
 import com.nimbox.graphql.annotations.GraphQLEnum;
 import com.nimbox.graphql.annotations.GraphQLInput;
-import com.nimbox.graphql.parameters.arguments.ArgumentFactory;
 import com.nimbox.graphql.registries.GraphRegistry;
-import com.nimbox.graphql.runtime.RuntimeNamedParameter;
+import com.nimbox.graphql.runtime.RuntimeParameter;
 import com.nimbox.graphql.types.GraphValueClass;
 import com.nimbox.graphql.utils.ReservedStrings;
 
@@ -21,8 +20,6 @@ public class GraphParameterArgument extends GraphParameter {
 	protected final String name;
 	protected final String description;
 
-	private final ArgumentFactory factory;
-
 	// constructors
 
 	public GraphParameterArgument(final GraphRegistry registry, final Parameter parameter, final GraphValueClass valueType) {
@@ -32,8 +29,6 @@ public class GraphParameterArgument extends GraphParameter {
 
 		this.name = annotation.name();
 		this.description = ReservedStrings.isDefined(annotation.description()) ? annotation.description() : null;
-
-		this.factory = registry.getArgumentFactory();
 
 	}
 
@@ -74,13 +69,13 @@ public class GraphParameterArgument extends GraphParameter {
 	}
 
 	@Override
-	public <T> T getParameterValue(DataFetchingEnvironment environment) throws Exception {
-		return factory.of(valueClass, environment.getArguments(), name);
+	public RuntimeParameter getRuntimeParameter() {
+		return new RuntimeParameter(name, valueClass);
 	}
 
 	@Override
-	public RuntimeNamedParameter getRuntimeParameter() {
-		return new RuntimeNamedParameter(valueClass, name);
+	public <T> T getParameterValue(DataFetchingEnvironment environment) throws Exception {
+		return null;
 	}
 
 	// methods

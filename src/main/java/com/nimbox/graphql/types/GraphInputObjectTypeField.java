@@ -44,7 +44,7 @@ public class GraphInputObjectTypeField {
 		return description;
 	}
 
-	public GraphValueClass getValueType() {
+	public GraphValueClass getValueClass() {
 		return valueType;
 	}
 

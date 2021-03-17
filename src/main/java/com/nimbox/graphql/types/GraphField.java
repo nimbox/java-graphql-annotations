@@ -12,6 +12,7 @@ import com.nimbox.graphql.annotations.GraphQLType;
 import com.nimbox.graphql.parameters.GraphParameter;
 import com.nimbox.graphql.parameters.GraphParameterArgument;
 import com.nimbox.graphql.registries.GraphRegistry;
+import com.nimbox.graphql.runtime.RuntimeParameterFactory;
 import com.nimbox.graphql.utils.ReservedStrings;
 
 import graphql.schema.DataFetcher;
@@ -20,7 +21,7 @@ public abstract class GraphField {
 
 	// properties
 
-	protected final Class<?> objectTypeClass;
+	protected final Class<?> typeClass;
 	protected final Method fieldMethod;
 
 	protected final String name;
@@ -38,7 +39,7 @@ public abstract class GraphField {
 
 		// create
 
-		this.objectTypeClass = typeClass;
+		this.typeClass = typeClass;
 		this.fieldMethod = fieldMethod;
 
 		this.name = annotation.name();
@@ -101,7 +102,7 @@ public abstract class GraphField {
 
 	}
 
-	public abstract DataFetcher<?> getFetcher();
+	public abstract DataFetcher<?> getFetcher(RuntimeParameterFactory factory);
 
 	// object overrides
 

@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import com.nimbox.graphql.parameters.arguments.ArgumentFactory;
 import com.nimbox.graphql.types.GraphEnumType;
 import com.nimbox.graphql.types.GraphInputObjectType;
 import com.nimbox.graphql.types.GraphObjectType;
@@ -32,8 +31,6 @@ public class GraphRegistry {
 
 	private final QueryRegistry queries;
 	private final MutationRegistry mutations;
-
-	private final ArgumentFactory argumentFactory = new ArgumentFactory();
 
 	// constructors
 
@@ -118,12 +115,6 @@ public class GraphRegistry {
 
 	public MutationRegistry getMutations() {
 		return mutations;
-	}
-
-	//
-
-	public ArgumentFactory getArgumentFactory() {
-		return argumentFactory;
 	}
 
 	//

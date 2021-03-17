@@ -75,7 +75,7 @@ public class TypeScanner extends Scanner<TypeScanner> {
 			enumType.description(description);
 		}
 
-		registry.getEnums().add(name, klass, enumType);
+//		registry.getEnums().add(name, klass, enumType);
 
 		Field[] fields = klass.getFields();
 		Object[] constants = klass.getEnumConstants();

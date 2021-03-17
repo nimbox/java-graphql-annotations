@@ -12,11 +12,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.nimbox.graphql.parameters.arguments.ArgumentFactory;
 import com.nimbox.graphql.registries.GraphRegistry;
+import com.nimbox.graphql.runtime.RuntimeParameterFactory;
 import com.nimbox.graphql.types.GraphEnumType;
 import com.nimbox.graphql.types.GraphEnumTypeValue;
 import com.nimbox.graphql.types.GraphInputObjectType;
@@ -39,7 +36,7 @@ import graphql.schema.GraphQLSchema;
 
 public class GraphSchemaBuilder {
 
-	private static final Logger _logger = LoggerFactory.getLogger(GraphSchemaBuilder.class);
+//	private static final Logger _logger = LoggerFactory.getLogger(GraphSchemaBuilder.class);
 
 	// properties
 
@@ -118,14 +115,16 @@ public class GraphSchemaBuilder {
 		GraphQLSchema.Builder builder = GraphQLSchema.newSchema();
 		GraphQLCodeRegistry.Builder codeBuilder = GraphQLCodeRegistry.newCodeRegistry();
 
+		RuntimeParameterFactory factory = new RuntimeParameterFactory();
+
 		//
 
-		buildScalars(registry, builder, codeBuilder);
-		buildEnums(registry, builder, codeBuilder);
+		buildScalars(registry, builder, codeBuilder, factory);
+		buildEnums(registry, builder, codeBuilder, factory);
 
 		// queries
 
-		buildQueries(registry, builder, codeBuilder);
+		buildQueries(registry, factory, builder, codeBuilder);
 
 		// mutations
 
@@ -142,13 +141,13 @@ public class GraphSchemaBuilder {
 
 		}
 
-		buildObjectTypes(registry, builder, codeBuilder);
+		buildObjectTypes(registry, factory, builder, codeBuilder);
 
 		// input objects
 
 		for (GraphInputObjectType inputObject : registry.getInputObjects().all()) {
 			builder.additionalType(inputObject.newObjectType(registry).build());
-			registry.getArgumentFactory().withInput(inputObject);
+			factory.with(inputObject);
 		}
 
 		// code
@@ -161,30 +160,30 @@ public class GraphSchemaBuilder {
 
 //		schemaDefinition.getCodeRegistry().getDataFetcher(FieldCoordinates.coordinates("Query", "getHuman"), "getHuman");
 
+		System.out.println("-----");
+		System.out.println(factory.toString());
+		System.out.println("-----");
+
 		return schemaDefinition;
 
 	}
 
 	//
 
-	private void buildScalars(GraphRegistry registry, GraphQLSchema.Builder builder, GraphQLCodeRegistry.Builder codeBuilder) {
-
-		ArgumentFactory factory = registry.getArgumentFactory();
+	private void buildScalars(GraphRegistry registry, GraphQLSchema.Builder builder, GraphQLCodeRegistry.Builder codeBuilder, RuntimeParameterFactory factory) {
 
 		for (GraphScalarType t : registry.getScalars().all()) {
 
 			GraphQLScalarType.Builder scalarTypeBuilder = t.newScalarType(registry);
 			builder.additionalType(scalarTypeBuilder.build());
 
-			factory.withScalar(t);
+			factory.with(t);
 
 		}
 
 	}
 
-	private void buildEnums(GraphRegistry registry, GraphQLSchema.Builder builder, GraphQLCodeRegistry.Builder codeBuilder) {
-
-		ArgumentFactory factory = registry.getArgumentFactory();
+	private void buildEnums(GraphRegistry registry, GraphQLSchema.Builder builder, GraphQLCodeRegistry.Builder codeBuilder, RuntimeParameterFactory factory) {
 
 		for (GraphEnumType t : registry.getEnums().all()) {
 
@@ -196,13 +195,13 @@ public class GraphSchemaBuilder {
 
 			builder.additionalType(enumTypeBuilder.build());
 
-			factory.withEnum(t);
+			factory.with(t);
 
 		}
 
 	}
 
-	private void buildQueries(GraphRegistry registry, GraphQLSchema.Builder builder, GraphQLCodeRegistry.Builder codeBuilder) {
+	private void buildQueries(GraphRegistry registry, RuntimeParameterFactory factory, GraphQLSchema.Builder builder, GraphQLCodeRegistry.Builder codeBuilder) {
 
 		List<GraphQueryField> queries = registry.getQueries().all();
 		if (!queries.isEmpty()) {
@@ -215,7 +214,7 @@ public class GraphSchemaBuilder {
 			for (GraphQueryField query : queries) {
 				GraphQLFieldDefinition fieldDefinition = query.newFieldDefinition(registry).build();
 				objectTypeBuilder.field(fieldDefinition);
-				fetchers.add(new FieldFetcher(fieldDefinition, query.getFetcher()));
+				fetchers.add(new FieldFetcher(fieldDefinition, query.getFetcher(factory)));
 			}
 
 			GraphQLObjectType objectTypeDefinition = objectTypeBuilder.build();
@@ -229,7 +228,7 @@ public class GraphSchemaBuilder {
 
 	}
 
-	private void buildMutations(GraphRegistry registry, GraphQLSchema.Builder builder, GraphQLCodeRegistry.Builder codeBuilder) {
+	private void buildMutations(GraphRegistry registry, RuntimeParameterFactory factory, GraphQLSchema.Builder builder, GraphQLCodeRegistry.Builder codeBuilder) {
 
 		List<GraphQueryField> queries = registry.getQueries().all();
 		if (!queries.isEmpty()) {
@@ -242,7 +241,7 @@ public class GraphSchemaBuilder {
 			for (GraphQueryField query : queries) {
 				GraphQLFieldDefinition fieldDefinition = query.newFieldDefinition(registry).build();
 				objectTypeBuilder.field(fieldDefinition);
-				fetchers.add(new FieldFetcher(fieldDefinition, query.getFetcher()));
+				fetchers.add(new FieldFetcher(fieldDefinition, query.getFetcher(factory)));
 			}
 
 			GraphQLObjectType objectTypeDefinition = objectTypeBuilder.build();
@@ -256,7 +255,7 @@ public class GraphSchemaBuilder {
 
 	}
 
-	private void buildObjectTypes(GraphRegistry registry, GraphQLSchema.Builder builder, GraphQLCodeRegistry.Builder codeBuilder) {
+	private void buildObjectTypes(GraphRegistry registry, RuntimeParameterFactory factory, GraphQLSchema.Builder builder, GraphQLCodeRegistry.Builder codeBuilder) {
 
 		for (GraphObjectType objectType : registry.getObjects().all()) {
 
@@ -275,7 +274,7 @@ public class GraphSchemaBuilder {
 			for (GraphObjectTypeField field : fields) {
 				GraphQLFieldDefinition fieldDefinition = field.newFieldDefinition(registry).build();
 				objectTypeBuilder.field(fieldDefinition);
-				fetchers.add(new FieldFetcher(fieldDefinition, field.getFetcher()));
+				fetchers.add(new FieldFetcher(fieldDefinition, field.getFetcher(factory)));
 			}
 
 			// extend
@@ -284,7 +283,7 @@ public class GraphSchemaBuilder {
 				for (GraphObjectTypeExtensionField field : extension.getFields().values()) {
 					GraphQLFieldDefinition fieldDefinition = field.newFieldDefinition(registry).build();
 					objectTypeBuilder.field(fieldDefinition);
-					fetchers.add(new FieldFetcher(fieldDefinition, field.getFetcher()));
+					fetchers.add(new FieldFetcher(fieldDefinition, field.getFetcher(factory)));
 				}
 			}
 

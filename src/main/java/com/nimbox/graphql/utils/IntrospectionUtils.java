@@ -53,7 +53,17 @@ public class IntrospectionUtils {
 
 		try {
 			return type.getConstructor(parameterTypes);
-		} catch (NoSuchMethodException | SecurityException e) {
+		} catch (Exception e) {
+			throw new GeneratorException(String.format("Class %s does not have constructor with parameters %s", type, Arrays.asList(parameterTypes)), e);
+		}
+
+	}
+
+	public static <T> T getClassInstanceOrThrow(Class<T> type, Class<?>... parameterTypes) {
+
+		try {
+			return (T) type.getConstructor(parameterTypes).newInstance(parameterTypes);
+		} catch (Exception e) {
 			throw new GeneratorException(String.format("Class %s does not have constructor with parameters %s", type, Arrays.asList(parameterTypes)), e);
 		}
 

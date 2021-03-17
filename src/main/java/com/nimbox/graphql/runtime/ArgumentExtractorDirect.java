@@ -1,4 +1,4 @@
-package com.nimbox.graphql.parameters.arguments;
+package com.nimbox.graphql.runtime;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,9 +6,20 @@ import java.util.Map;
 
 import com.nimbox.graphql.types.GraphValueClass;
 
-public class ArgumentScalar extends Argument {
+class ArgumentExtractorDirect implements ArgumentExtractor {
 
-	public Object instance(ArgumentFactory factory, final GraphValueClass valueClass, final Map<String, Object> arguments, final String name) {
+	// constructors
+
+	public ArgumentExtractorDirect() {
+	}
+
+	// mehods
+
+	@Override
+	public Object apply(Map<String, Object> arguments, RuntimeParameter parameter) throws Exception {
+
+		String name = parameter.name;
+		GraphValueClass valueClass = parameter.valueClass;
 
 		if (!arguments.containsKey(name)) {
 			if (valueClass.isList()) {

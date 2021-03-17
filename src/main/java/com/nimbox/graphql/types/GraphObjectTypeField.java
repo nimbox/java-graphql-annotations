@@ -3,9 +3,10 @@ package com.nimbox.graphql.types;
 import java.lang.reflect.Method;
 
 import com.nimbox.graphql.registries.GraphRegistry;
+import com.nimbox.graphql.runtime.RuntimeParameterFactory;
+import com.nimbox.graphql.runtime.RuntimeSourceDataFetcher;
 
 import graphql.schema.DataFetcher;
-import graphql.schema.DataFetchingEnvironment;
 
 public class GraphObjectTypeField extends GraphField {
 
@@ -17,29 +18,8 @@ public class GraphObjectTypeField extends GraphField {
 
 	// methods
 
-	public DataFetcher<?> getFetcher() {
-
-		return new DataFetcher<>() {
-
-			@Override
-			public Object get(DataFetchingEnvironment environment) throws Exception {
-
-				Object[] args = new Object[parameters.size()];
-				for (int i = 0; i < parameters.size(); i++) {
-					args[i] = parameters.get(i).getParameterValue(environment);
-				}
-
-				Object source = environment.getSource();
-				if (source == null) {
-					return fieldMethod.invoke(objectTypeClass.getDeclaredConstructor().newInstance(), args);
-				} else {
-					return fieldMethod.invoke(source, args);
-				}
-
-			}
-
-		};
-
+	public DataFetcher<?> getFetcher(RuntimeParameterFactory factory) {
+		return new RuntimeSourceDataFetcher<>(factory, typeClass, fieldMethod, parameters);
 	}
 
 }
