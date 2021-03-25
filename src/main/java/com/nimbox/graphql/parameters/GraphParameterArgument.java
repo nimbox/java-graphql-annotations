@@ -2,7 +2,7 @@ package com.nimbox.graphql.parameters;
 
 import java.lang.reflect.Parameter;
 
-import com.nimbox.graphql.GeneratorException;
+import com.nimbox.graphql.GraphBuilderException;
 import com.nimbox.graphql.annotations.GraphQLArgument;
 import com.nimbox.graphql.annotations.GraphQLEnum;
 import com.nimbox.graphql.annotations.GraphQLInput;
@@ -50,7 +50,7 @@ public class GraphParameterArgument extends GraphParameter {
 			return new GraphParameterArgumentEnum(registry, fieldParameter, valueType);
 		}
 
-		throw new GeneratorException(String.format("Parameter %s annotated with %s does not have a recognized return type %s", //
+		throw new GraphBuilderException(String.format("Parameter %s annotated with %s does not have a recognized return type %s", //
 				fieldParameter.getName(), //
 				GraphQLArgument.class, //
 				valueType.getValueClass()) //
@@ -70,7 +70,7 @@ public class GraphParameterArgument extends GraphParameter {
 
 	@Override
 	public RuntimeParameter getRuntimeParameter() {
-		return new RuntimeParameter(name, valueClass);
+		return new RuntimeParameter(valueClass, name);
 	}
 
 	@Override

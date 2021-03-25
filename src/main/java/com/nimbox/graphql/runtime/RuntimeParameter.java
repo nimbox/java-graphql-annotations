@@ -6,19 +6,19 @@ public class RuntimeParameter {
 
 	// properties
 
+	protected final GraphValueClass type;
 	protected final String name;
-	protected final GraphValueClass valueClass;
 
 	// constructors
 
-	public RuntimeParameter(GraphValueClass valueClass) {
-		this.valueClass = valueClass;
+	public RuntimeParameter(GraphValueClass type) {
+		this.type = type;
 		this.name = null;
 	}
 
-	public RuntimeParameter(String name, GraphValueClass valueClass) {
+	public RuntimeParameter(GraphValueClass type, String name) {
+		this.type = type;
 		this.name = name;
-		this.valueClass = valueClass;
 	}
 
 }

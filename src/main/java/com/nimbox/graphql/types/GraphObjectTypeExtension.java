@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.nimbox.graphql.annotations.GraphQLQuery;
+import com.nimbox.graphql.annotations.GraphQLField;
 import com.nimbox.graphql.annotations.GraphQLTypeExtension;
 import com.nimbox.graphql.registries.GraphRegistry;
 
@@ -35,7 +35,7 @@ public class GraphObjectTypeExtension {
 		// fields
 
 		for (Method method : objectTypeExtensionClass.getMethods()) {
-			if (method.isAnnotationPresent(GraphQLQuery.class)) {
+			if (method.isAnnotationPresent(GraphQLField.class)) {
 				fields.put(method, new GraphObjectTypeExtensionField(registry, objectTypeExtensionClass, method, this.objectTypeClass));
 			}
 		}

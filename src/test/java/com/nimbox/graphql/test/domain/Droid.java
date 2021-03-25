@@ -2,7 +2,7 @@ package com.nimbox.graphql.test.domain;
 
 import java.util.List;
 
-import com.nimbox.graphql.annotations.GraphQLQuery;
+import com.nimbox.graphql.annotations.GraphQLField;
 import com.nimbox.graphql.annotations.GraphQLType;
 
 @GraphQLType(name = "Droid", description = "A character in the Star Wars Trilogy.")
@@ -15,7 +15,7 @@ public class Droid extends Character {
 		this.primaryFunction = primaryFunction;
 	}
 
-	@GraphQLQuery(name = "primaryFunction", description = "The primary function of the droid.")
+	@GraphQLField(name = "primaryFunction", description = "The primary function of the droid.")
 	public String getPrimaryFunction() {
 		return primaryFunction;
 	}

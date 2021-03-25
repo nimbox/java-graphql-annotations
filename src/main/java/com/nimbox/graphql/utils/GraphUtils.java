@@ -1,9 +1,9 @@
-package com.nimbox.graphql.test.utils;
+package com.nimbox.graphql.utils;
+
+import static graphql.schema.GraphqlTypeComparatorRegistry.AS_IS_REGISTRY;
 
 import graphql.schema.GraphQLSchema;
 import graphql.schema.idl.SchemaPrinter;
-
-import static graphql.schema.GraphqlTypeComparatorRegistry.AS_IS_REGISTRY;
 
 public class GraphUtils {
 

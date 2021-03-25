@@ -3,15 +3,15 @@ package com.nimbox.graphql.registries;
 import static com.nimbox.graphql.utils.IntrospectionUtils.getTypeAnnotationOrThrow;
 import static graphql.Scalars.GraphQLBoolean;
 import static graphql.Scalars.GraphQLFloat;
-import static graphql.Scalars.GraphQLID;
 import static graphql.Scalars.GraphQLInt;
 import static graphql.Scalars.GraphQLString;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.nimbox.graphql.GeneratorException;
+import com.nimbox.graphql.GraphBuilderException;
 import com.nimbox.graphql.annotations.GraphQLScalar;
 import com.nimbox.graphql.types.GraphScalarType;
 
@@ -34,31 +34,34 @@ public class ScalarTypeRegistry {
 		this.registry = registry;
 
 		defaults.put(Integer.class, GraphQLInt);
+		defaults.put(Long.class, GraphQLInt);
+
 		defaults.put(Double.class, GraphQLFloat);
+		defaults.put(BigDecimal.class, GraphQLFloat);
+
 		defaults.put(String.class, GraphQLString);
 		defaults.put(Boolean.class, GraphQLBoolean);
-		defaults.put(String.class, GraphQLID);
 
 	}
 
-	public GraphScalarType of(final Class<?> scalarTypeClass) {
+	public GraphScalarType of(final Class<?> javaClass, final Class<?> scalarCoercingClass) {
 
-		if (data.containsKey(scalarTypeClass)) {
-			return data.get(scalarTypeClass);
+		if (data.containsKey(javaClass)) {
+			return data.get(javaClass);
 		}
 
 		// check the name is not duplicated
 
-		GraphQLScalar annotation = getTypeAnnotationOrThrow(GraphQLScalar.class, scalarTypeClass);
+		GraphQLScalar annotation = getTypeAnnotationOrThrow(GraphQLScalar.class, scalarCoercingClass);
 		if (names.containsKey(annotation.name())) {
-			throw new GeneratorException(String.format("Type %s has same name as type %s", scalarTypeClass, names.get(annotation.name())));
+			throw new GraphBuilderException(String.format("Type %s has same name as type %s", javaClass, names.get(annotation.name())));
 		}
 
 		// create
 
-		GraphScalarType scalarType = new GraphScalarType(registry, scalarTypeClass);
-		data.put(scalarTypeClass, scalarType);
-		names.put(scalarType.getName(), scalarTypeClass);
+		GraphScalarType scalarType = new GraphScalarType(registry, javaClass, scalarCoercingClass);
+		data.put(javaClass, scalarType);
+		names.put(scalarType.getName(), javaClass);
 
 		// return
 
@@ -73,7 +76,21 @@ public class ScalarTypeRegistry {
 	}
 
 	public GraphQLScalarType getScalarType(Class<?> valueClass) {
-		return defaults.get(valueClass);
+
+		if (defaults.containsKey(valueClass)) {
+			return defaults.get(valueClass);
+		}
+
+		if (data.containsKey(valueClass)) {
+			GraphScalarType scalarType = data.get(valueClass);
+			return scalarType.built();
+		}
+
+		System.out.println("VALUECLASS: " + valueClass);
+		System.out.println(data.keySet());
+
+		return null;
+
 	}
 
 	public Collection<GraphScalarType> all() {

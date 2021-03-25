@@ -2,7 +2,7 @@ package com.nimbox.graphql.parameters;
 
 import java.lang.reflect.Parameter;
 
-import com.nimbox.graphql.GeneratorException;
+import com.nimbox.graphql.GraphBuilderException;
 import com.nimbox.graphql.annotations.GraphQLSource;
 import com.nimbox.graphql.annotations.GraphQLType;
 import com.nimbox.graphql.registries.GraphRegistry;
@@ -19,7 +19,7 @@ public class GraphParameterSource extends GraphParameter {
 		super(registry, fieldParameter, new GraphValueClass(fieldParameter.getType()), GraphQLSource.class);
 
 		if (valueClass.isOptional() || valueClass.isList() || !this.valueClass.getValueClass().isAnnotationPresent(GraphQLType.class)) {
-			throw new GeneratorException(String.format("Parameter %s annotated with %s must reference a class annotated with %s", //
+			throw new GraphBuilderException(String.format("Parameter %s annotated with %s must reference a class annotated with %s", //
 					fieldParameter.getName(), //
 					GraphQLSource.class, //
 					GraphQLType.class) //

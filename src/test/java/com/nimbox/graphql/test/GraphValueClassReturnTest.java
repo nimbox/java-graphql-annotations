@@ -15,7 +15,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.nimbox.graphql.GeneratorException;
+import com.nimbox.graphql.GraphBuilderException;
 import com.nimbox.graphql.annotations.GraphQLId;
 import com.nimbox.graphql.registries.GraphRegistry;
 import com.nimbox.graphql.test.TypeObjectTest.ExecutionContext;
@@ -47,7 +47,7 @@ class GraphValueClassReturnTest {
 		Class<?> klass = k.getClass();
 		Method method = Arrays.stream(klass.getMethods()).filter(m -> m.getName().equals("method")).findFirst().get();
 
-		assertThrows(GeneratorException.class, () -> {
+		assertThrows(GraphBuilderException.class, () -> {
 			new GraphValueClass(registry, method, method.getGenericReturnType());
 		});
 
@@ -412,7 +412,7 @@ class GraphValueClassReturnTest {
 		Class<?> klass = k.getClass();
 		Method method = Arrays.stream(klass.getMethods()).filter(m -> m.getName().equals("method")).findFirst().get();
 
-		assertThrows(GeneratorException.class, () -> {
+		assertThrows(GraphBuilderException.class, () -> {
 			new GraphValueClass(registry, method, method.getGenericReturnType());
 		});
 
@@ -431,7 +431,7 @@ class GraphValueClassReturnTest {
 		Class<?> klass = k.getClass();
 		Method method = Arrays.stream(klass.getMethods()).filter(m -> m.getName().equals("method")).findFirst().get();
 
-		assertThrows(GeneratorException.class, () -> {
+		assertThrows(GraphBuilderException.class, () -> {
 			new GraphValueClass(registry, method, method.getGenericReturnType());
 		});
 
@@ -450,7 +450,7 @@ class GraphValueClassReturnTest {
 		Class<?> klass = k.getClass();
 		Method method = Arrays.stream(klass.getMethods()).filter(m -> m.getName().equals("method")).findFirst().get();
 
-		assertThrows(GeneratorException.class, () -> {
+		assertThrows(GraphBuilderException.class, () -> {
 			new GraphValueClass(registry, method, method.getGenericReturnType());
 		});
 
@@ -469,7 +469,7 @@ class GraphValueClassReturnTest {
 		Class<?> klass = k.getClass();
 		Method method = Arrays.stream(klass.getMethods()).filter(m -> m.getName().equals("method")).findFirst().get();
 
-		assertThrows(GeneratorException.class, () -> {
+		assertThrows(GraphBuilderException.class, () -> {
 			new GraphValueClass(registry, method, method.getGenericReturnType());
 		});
 

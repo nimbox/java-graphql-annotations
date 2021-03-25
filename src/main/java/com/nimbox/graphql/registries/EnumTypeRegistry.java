@@ -6,7 +6,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.nimbox.graphql.GeneratorException;
+import com.nimbox.graphql.GraphBuilderException;
 import com.nimbox.graphql.annotations.GraphQLEnum;
 import com.nimbox.graphql.types.GraphEnumType;
 
@@ -35,7 +35,7 @@ public class EnumTypeRegistry {
 
 		GraphQLEnum annotation = getTypeAnnotationOrThrow(GraphQLEnum.class, enumTypeClass);
 		if (names.containsKey(annotation.name())) {
-			throw new GeneratorException(String.format("Type %s has same name as type %s", enumTypeClass, names.get(annotation.name())));
+			throw new GraphBuilderException(String.format("Type %s has same name as type %s", enumTypeClass, names.get(annotation.name())));
 		}
 
 		// create

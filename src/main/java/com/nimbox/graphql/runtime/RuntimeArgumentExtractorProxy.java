@@ -1,6 +1,6 @@
 package com.nimbox.graphql.runtime;
 
-import static com.nimbox.graphql.runtime.ArgumentInputProxy.proxy;
+import static com.nimbox.graphql.runtime.RuntimeArgumentInputProxy.proxy;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -12,24 +12,24 @@ import com.nimbox.graphql.types.GraphInputObjectType;
 import com.nimbox.graphql.types.GraphInputObjectTypeField;
 import com.nimbox.graphql.types.GraphValueClass;
 
-public class ArgumentExtractorProxy implements ArgumentExtractor {
+public class RuntimeArgumentExtractorProxy implements RuntimeArgumentExtractor {
 
 	// properties
 
-	private final ArgumentFactory factory;
+	private final RuntimeArgumentFactory factory;
 
 	private final Class<?> typeClass;
 	private final Map<Method, RuntimeParameter> fields = new LinkedHashMap<Method, RuntimeParameter>();
 
 	// constructors
 
-	public ArgumentExtractorProxy(ArgumentFactory factory, GraphInputObjectType inputObjectType) {
+	public RuntimeArgumentExtractorProxy(RuntimeArgumentFactory factory, GraphInputObjectType inputObjectType) {
 
 		this.factory = factory;
 
 		this.typeClass = inputObjectType.getInputObjectTypeClass();
 		for (Map.Entry<Method, GraphInputObjectTypeField> e : inputObjectType.getFields().entrySet()) {
-			fields.put(e.getKey(), new RuntimeParameter(e.getValue().getName(), e.getValue().getValueClass()));
+			fields.put(e.getKey(), new RuntimeParameter(e.getValue().getValueClass(), e.getValue().getName()));
 		}
 
 	}
@@ -41,7 +41,7 @@ public class ArgumentExtractorProxy implements ArgumentExtractor {
 	public Object apply(Map<String, Object> arguments, RuntimeParameter parameter) throws Exception {
 
 		String name = parameter.name;
-		GraphValueClass valueClass = parameter.valueClass;
+		GraphValueClass valueClass = parameter.type;
 
 		if (!arguments.containsKey(name)) {
 			if (valueClass.isList()) {

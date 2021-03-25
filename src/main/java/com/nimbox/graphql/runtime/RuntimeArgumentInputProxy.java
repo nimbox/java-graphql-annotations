@@ -5,26 +5,26 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Map;
 
-public class ArgumentInputProxy implements InvocationHandler {
+public class RuntimeArgumentInputProxy implements InvocationHandler {
 
 	// properties
 
-	private final ArgumentFactory factory;
+	private final RuntimeArgumentFactory factory;
 
 	private final Map<Method, RuntimeParameter> fields;
 	private final Map<String, Object> arguments;
 
 	// constructors
 
-	public ArgumentInputProxy(ArgumentFactory factory, Map<Method, RuntimeParameter> fields, Map<String, Object> arguments) {
+	public RuntimeArgumentInputProxy(RuntimeArgumentFactory factory, Map<Method, RuntimeParameter> fields, Map<String, Object> arguments) {
 		this.factory = factory;
 		this.fields = fields;
 		this.arguments = arguments;
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <T> T proxy(Class<?> inputObjectClass, ArgumentFactory factory, Map<Method, RuntimeParameter> fields, Map<String, Object> arguments) throws Exception {
-		return (T) Proxy.newProxyInstance(inputObjectClass.getClassLoader(), new Class[] { inputObjectClass }, new ArgumentInputProxy(factory, fields, arguments));
+	public static <T> T proxy(Class<?> inputObjectClass, RuntimeArgumentFactory factory, Map<Method, RuntimeParameter> fields, Map<String, Object> arguments) throws Exception {
+		return (T) Proxy.newProxyInstance(inputObjectClass.getClassLoader(), new Class[] { inputObjectClass }, new RuntimeArgumentInputProxy(factory, fields, arguments));
 	}
 
 	// methods
@@ -41,7 +41,7 @@ public class ArgumentInputProxy implements InvocationHandler {
 			return arguments.toString();
 		}
 
-		throw new IllegalArgumentException(String.format("Method %s does not have a mapping", method));
+		throw new IllegalArgumentException(String.format("Method %s does not have a corresponding mapping", method));
 
 	}
 

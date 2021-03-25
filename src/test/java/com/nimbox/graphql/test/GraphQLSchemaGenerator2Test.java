@@ -1,6 +1,6 @@
 package com.nimbox.graphql.test;
 
-import com.nimbox.graphql.annotations.GraphQLQuery;
+import com.nimbox.graphql.annotations.GraphQLField;
 import com.nimbox.graphql.annotations.GraphQLType;
 
 import io.github.classgraph.AnnotationInfo;
@@ -29,9 +29,9 @@ class GraphQLSchemaGenerator2Test {
 
 				for (MethodInfo m : info.getMethodInfo()) {
 
-					if (m.hasAnnotation(GraphQLQuery.class.getName())) {
+					if (m.hasAnnotation(GraphQLField.class.getName())) {
 
-						AnnotationInfo a = m.getAnnotationInfo(GraphQLQuery.class.getName());
+						AnnotationInfo a = m.getAnnotationInfo(GraphQLField.class.getName());
 						System.out.println("  " + m.getName());
 
 						System.out.println("NAME: " + a.getParameterValues().get("name").getValue());

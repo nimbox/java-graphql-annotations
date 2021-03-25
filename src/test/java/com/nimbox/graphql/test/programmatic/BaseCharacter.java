@@ -69,7 +69,7 @@ public class BaseCharacter {
 
 		@Override
 		public GraphQLObjectType getType(TypeResolutionEnvironment environment) {
-
+			
 			String id = (String) environment.getArguments().get("id");
 
 			if (BaseHuman.HUMANS.containsKey(id)) {

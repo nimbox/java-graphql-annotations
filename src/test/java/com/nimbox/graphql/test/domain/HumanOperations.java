@@ -6,16 +6,29 @@ import java.util.List;
 import java.util.Optional;
 
 import com.nimbox.graphql.annotations.GraphQLArgument;
+import com.nimbox.graphql.annotations.GraphQLEnvironment;
 import com.nimbox.graphql.annotations.GraphQLId;
 import com.nimbox.graphql.annotations.GraphQLInput;
 import com.nimbox.graphql.annotations.GraphQLInputField;
+import com.nimbox.graphql.annotations.GraphQLMutation;
 import com.nimbox.graphql.annotations.GraphQLQuery;
 import com.nimbox.util.Alternative;
+
+import graphql.schema.DataFetchingEnvironment;
 
 public class HumanOperations {
 
 	public Alternative<Human> getHuman1(@GraphQLArgument(name = "id") @GraphQLId String id) {
 		return null;
+	}
+
+	@GraphQLQuery(name = "getCharacter")
+	public Optional<Character> getCharacter(@GraphQLArgument(name = "id") @GraphQLId String id) {
+
+		System.out.println("in get character");
+
+		return Optional.of(new Human(id, "Ricardo", Collections.emptyList(), Collections.emptyList(), "Guacara"));
+
 	}
 
 	@GraphQLQuery(name = "getHuman")
@@ -49,27 +62,60 @@ public class HumanOperations {
 	}
 
 	@GraphQLQuery(name = "getHumansByEpisode")
-	public List<Human> getHumansByEpisode(@GraphQLArgument(name = "episode") Episode episode, @GraphQLArgument(name = "age") Optional<Integer> age) {
+	public List<Human> getHumansByEpisode(@GraphQLArgument(name = "episode") Episode episode, @GraphQLArgument(name = "age") Optional<Integer> age, @GraphQLEnvironment DataFetchingEnvironment environment) {
 
 		System.out.println("in get humans");
 		System.out.println(episode);
 		System.out.println(age);
+		System.out.println((String) environment.getSource());
 
 		return Collections.emptyList();
 //		return Arrays.asList(new Human(limit.toString(), "Ricardo", Collections.emptyList(), Collections.emptyList(), "Guacara"));
 
 	}
 
-	// @GraphQLMutation(name = "createHuman")
-//	public Human createHuman(@GraphQLArgument(name = "input") HumanInput input) {
-//		return null;
-//	}
+	@GraphQLMutation(name = "createHuman")
+	public Human createHuman(@GraphQLArgument(name = "input") HumanInput input) {
 
-	@GraphQLInput(name = "HumanInput")
+		System.out.println("CREATING HUMAN...");
+
+		System.out.println("NAME: " + input.getName());
+
+		return new Human("007", "Joao", Collections.emptyList(), Collections.emptyList(), "Tachira");
+
+//		return null;
+	}
+
+	// inputs
+
+	@GraphQLInput(name = "HumanInput", fieldOrder = { "name", "address" })
 	public static interface HumanInput {
 
 		@GraphQLInputField(name = "name")
 		String getName();
+
+		@GraphQLInputField(name = "address")
+		Optional<String> getAddress();
+
+//		@GraphQLInputField(name = "nested")
+//		Optional<HumanNestedInput> getNested();
+
+	}
+
+	@GraphQLInput(name = "HumanInput", fieldOrder = { "name", "address" })
+	public static interface HumanNestedInput {
+
+		@GraphQLInputField(name = "name1")
+		String getName();
+
+//		@GraphQLInputField(name = "age1")
+//		Integer getAge();
+//
+//		@GraphQLInputField(name = "salary1")
+//		Double getSalary();
+//
+//		@GraphQLInputField(name = "address1")
+//		Optional<String> getAddress();
 
 	}
 

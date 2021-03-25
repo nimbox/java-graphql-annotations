@@ -9,11 +9,11 @@ import com.nimbox.graphql.utils.ReservedStrings;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.METHOD })
-public @interface GraphQLMutation {
+public @interface GraphQLField {
 
-	String name();
+	String name() default "";
 
-	String description() default ReservedStrings.NULL;
+	String description() default "";
 
 	String deprecationReason() default ReservedStrings.NULL;
 

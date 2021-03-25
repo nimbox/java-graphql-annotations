@@ -8,13 +8,13 @@ import java.lang.annotation.Target;
 import com.nimbox.graphql.utils.ReservedStrings;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.METHOD })
-public @interface GraphQLMutation {
+@Target({ ElementType.TYPE, ElementType.TYPE_USE })
+public @interface GraphQLInterface {
 
 	String name();
 
-	String description() default ReservedStrings.NULL;
+	String description() default ReservedStrings.UNDEFINED;
 
-	String deprecationReason() default ReservedStrings.NULL;
+	String[] fieldOrder() default {};
 
 }

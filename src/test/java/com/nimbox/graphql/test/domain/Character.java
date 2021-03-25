@@ -2,12 +2,11 @@ package com.nimbox.graphql.test.domain;
 
 import java.util.List;
 
+import com.nimbox.graphql.annotations.GraphQLField;
 import com.nimbox.graphql.annotations.GraphQLId;
-import com.nimbox.graphql.annotations.GraphQLNonNull;
-import com.nimbox.graphql.annotations.GraphQLQuery;
-import com.nimbox.graphql.annotations.GraphQLType;
+import com.nimbox.graphql.annotations.GraphQLInterface;
 
-@GraphQLType(name = "Character", description = "A character in the Star Wars Trilogy.")
+@GraphQLInterface(name = "Character", description = "A character in the Star Wars Trilogy.")
 public class Character {
 
 	private String id;
@@ -21,7 +20,7 @@ public class Character {
 		this.name = name;
 	}
 
-	@GraphQLQuery(name = "id", description = "The id of the character.")
+	@GraphQLField(name = "id", description = "The id of the character.")
 	public @GraphQLId String getId() {
 		return id;
 	}
@@ -30,7 +29,7 @@ public class Character {
 		this.id = id;
 	}
 
-	@GraphQLQuery(name = "name", description = "The name of the character.")
+	@GraphQLField(name = "name", description = "The name of the character.")
 	public String getName() {
 		return name;
 	}

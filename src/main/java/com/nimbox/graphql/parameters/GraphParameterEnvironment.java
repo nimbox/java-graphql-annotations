@@ -2,7 +2,7 @@ package com.nimbox.graphql.parameters;
 
 import java.lang.reflect.Parameter;
 
-import com.nimbox.graphql.GeneratorException;
+import com.nimbox.graphql.GraphBuilderException;
 import com.nimbox.graphql.annotations.GraphQLEnvironment;
 import com.nimbox.graphql.registries.GraphRegistry;
 import com.nimbox.graphql.runtime.RuntimeParameter;
@@ -18,7 +18,7 @@ public class GraphParameterEnvironment extends GraphParameter {
 		super(registry, fieldParameter, new GraphValueClass(fieldParameter.getType()), GraphQLEnvironment.class);
 
 		if (valueClass.isOptional() || valueClass.isList() || !DataFetchingEnvironment.class.isAssignableFrom(this.valueClass.getValueClass())) {
-			throw new GeneratorException(String.format("Parameter %s annotated with %s must have type %s", //
+			throw new GraphBuilderException(String.format("Parameter %s annotated with %s must have type %s", //
 					fieldParameter.getName(), //
 					GraphQLEnvironment.class, //
 					DataFetchingEnvironment.class) //

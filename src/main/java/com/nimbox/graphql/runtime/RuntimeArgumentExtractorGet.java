@@ -6,11 +6,11 @@ import java.util.Map;
 
 import com.nimbox.graphql.types.GraphValueClass;
 
-class ArgumentExtractorDirect implements ArgumentExtractor {
+class RuntimeArgumentExtractorGet implements RuntimeArgumentExtractor {
 
 	// constructors
 
-	public ArgumentExtractorDirect() {
+	public RuntimeArgumentExtractorGet() {
 	}
 
 	// mehods
@@ -19,7 +19,7 @@ class ArgumentExtractorDirect implements ArgumentExtractor {
 	public Object apply(Map<String, Object> arguments, RuntimeParameter parameter) throws Exception {
 
 		String name = parameter.name;
-		GraphValueClass valueClass = parameter.valueClass;
+		GraphValueClass valueClass = parameter.type;
 
 		if (!arguments.containsKey(name)) {
 			if (valueClass.isList()) {

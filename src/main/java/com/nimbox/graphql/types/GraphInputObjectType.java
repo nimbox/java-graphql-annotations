@@ -12,7 +12,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.nimbox.graphql.GeneratorException;
+import com.nimbox.graphql.GraphBuilderException;
 import com.nimbox.graphql.annotations.GraphQLInput;
 import com.nimbox.graphql.annotations.GraphQLInputField;
 import com.nimbox.graphql.registries.GraphRegistry;
@@ -39,7 +39,7 @@ public class GraphInputObjectType {
 			annotation = inputObjectTypeClass.getAnnotatedSuperclass().getAnnotation(GraphQLInput.class);
 		}
 		if (annotation == null) {
-			throw new GeneratorException(String.format("Expected annotation %s on class %s", GraphQLInput.class, inputObjectTypeClass));
+			throw new GraphBuilderException(String.format("Expected annotation %s on class %s", GraphQLInput.class, inputObjectTypeClass));
 		}
 
 		// create
@@ -101,6 +101,9 @@ public class GraphInputObjectType {
 		// build each field
 
 		for (GraphInputObjectTypeField field : fields) {
+			
+			System.out.println(field);
+			
 			builder.field(field.newInputObjectField(registry));
 		}
 

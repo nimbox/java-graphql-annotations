@@ -1,13 +1,12 @@
 package com.nimbox.graphql.registries;
 
-import static com.nimbox.graphql.utils.IntrospectionUtils.getTypeAnnotationOrThrow;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.nimbox.graphql.GeneratorException;
-import com.nimbox.graphql.annotations.GraphQLType;
+import com.nimbox.graphql.GraphBuilderException;
+import com.nimbox.graphql.registries.GraphRegistry.TypeAnnotation;
+import com.nimbox.graphql.registries.GraphRegistry.TypeAnnotation.Content;
 import com.nimbox.graphql.types.GraphObjectType;
 
 public class ObjectTypeRegistry {
@@ -32,9 +31,9 @@ public class ObjectTypeRegistry {
 
 		// check the name is not duplicated
 
-		GraphQLType annotation = getTypeAnnotationOrThrow(GraphQLType.class, objectTypeClass);
-		if (names.containsKey(annotation.name())) {
-			throw new GeneratorException(String.format("Type %s has same name as type %s", objectTypeClass, names.get(annotation.name())));
+		TypeAnnotation<?>.Content annotation = registry.getTypeAnnotationOrThrow(objectTypeClass);
+		if (names.containsKey(annotation.getName())) {
+			throw new GraphBuilderException(String.format("Type %s has same name as type %s", objectTypeClass, names.get(annotation.getName())));
 		}
 
 		// create

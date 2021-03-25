@@ -3,7 +3,7 @@ package com.nimbox.graphql.test.domain;
 import java.util.Collections;
 import java.util.List;
 
-import com.nimbox.graphql.annotations.GraphQLQuery;
+import com.nimbox.graphql.annotations.GraphQLField;
 import com.nimbox.graphql.annotations.GraphQLTypeExtension;
 
 @GraphQLTypeExtension(type = Human.class)
@@ -15,7 +15,7 @@ public class CharacterExtension {
 		this.human = human;
 	}
 
-	@GraphQLQuery(name = "getFriends", description = "The friends of the character, or an empty list if they have none.")
+	@GraphQLField(name = "getFriends", description = "The friends of the character, or an empty list if they have none.")
 	public List<Human> getFriends() {
 
 		System.out.println("human.getId(): " + human.getId().getClass());

@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.nimbox.graphql.GeneratorException;
+import com.nimbox.graphql.GraphBuilderException;
 import com.nimbox.graphql.annotations.GraphQLInput;
 import com.nimbox.graphql.types.GraphInputObjectType;
 
@@ -35,13 +35,13 @@ public class InputObjectTypeRegistry {
 			annotation = typeClass.getAnnotatedSuperclass().getAnnotation(GraphQLInput.class);
 		}
 		if (annotation == null) {
-			throw new GeneratorException(String.format("Type %s does not have annotation %s", typeClass, GraphQLInput.class));
+			throw new GraphBuilderException(String.format("Type %s does not have annotation %s", typeClass, GraphQLInput.class));
 		}
 
 		// check the name is not duplicated
 
 		if (names.containsKey(annotation.name())) {
-			throw new GeneratorException(String.format("Type %s has same name as type %s", typeClass, names.get(annotation.name())));
+			throw new GraphBuilderException(String.format("Type %s has same name as type %s", typeClass, names.get(annotation.name())));
 		}
 
 		// create

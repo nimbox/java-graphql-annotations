@@ -7,33 +7,27 @@ import com.nimbox.graphql.types.GraphEnumType;
 import com.nimbox.graphql.types.GraphInputObjectType;
 import com.nimbox.graphql.types.GraphScalarType;
 
+import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 
 public class RuntimeParameterFactory {
 
 	// properties
 
-	private Map<Class<?>, RuntimeParameterExtractor> extractors = new HashMap<Class<?>, RuntimeParameterExtractor>();
-	private ArgumentFactory arguments = new ArgumentFactory();
+	private Map<Class<?>, Map<String, DataFetcher<?>>> extractors = new HashMap<Class<?>, Map<String, DataFetcher<?>>>();
+	private RuntimeArgumentFactory arguments = new RuntimeArgumentFactory();
 
 	// constructors
 
 	public RuntimeParameterFactory() {
-
-		extractors.put(DataFetchingEnvironment.class, new RuntimeParameterExtractor() {
-
-			@Override
-			public Object apply(DataFetchingEnvironment environment, RuntimeParameter parameter) throws Exception {
-				return environment;
-			}
-
-			public String toString() {
-				return DataFetchingEnvironment.class.toString();
-			}
-
-		});
-
 	}
+
+	public <T> RuntimeParameterFactory with(Class<T> context, String name, DataFetcher<T> fetcher) {
+		extractors.computeIfAbsent(context, c -> new HashMap<String, DataFetcher<?>>()).put(name, fetcher);
+		return this;
+	}
+
+	//
 
 	public RuntimeParameterFactory with(GraphScalarType scalarType) {
 		arguments.with(scalarType);
@@ -55,8 +49,8 @@ public class RuntimeParameterFactory {
 	@SuppressWarnings("unchecked")
 	public <T> T get(DataFetchingEnvironment environment, RuntimeParameter parameter) throws Exception {
 
-		if (extractors.containsKey(parameter.valueClass.getValueClass())) {
-			return (T) extractors.get(parameter.valueClass.getValueClass()).apply(environment, parameter);
+		if (extractors.containsKey(parameter.type.getValueClass())) {
+			return (T) extractors.get(parameter.type.getValueClass()).get(parameter.name).get(environment);
 		}
 
 		return (T) arguments.get(environment.getArguments(), parameter);
@@ -69,7 +63,7 @@ public class RuntimeParameterFactory {
 
 		StringBuilder builder = new StringBuilder();
 
-		for (Map.Entry<Class<?>, RuntimeParameterExtractor> e : extractors.entrySet()) {
+		for (Map.Entry<Class<?>, Map<String, DataFetcher<?>>> e : extractors.entrySet()) {
 			builder.append(e.getKey()).append(" ").append(e.getValue()).append("\n");
 		}
 		builder.append(arguments.toString());

@@ -2,7 +2,7 @@ package com.nimbox.graphql.types;
 
 import java.lang.reflect.Method;
 
-import com.nimbox.graphql.GeneratorException;
+import com.nimbox.graphql.GraphBuilderException;
 import com.nimbox.graphql.annotations.GraphQLInputField;
 import com.nimbox.graphql.registries.GraphRegistry;
 import com.nimbox.graphql.utils.ReservedStrings;
@@ -23,7 +23,7 @@ public class GraphInputObjectTypeField {
 
 		GraphQLInputField annotation = method.getAnnotation(GraphQLInputField.class);
 		if (annotation == null) {
-			throw new GeneratorException(String.format("Expected annotation %s on method %s", GraphQLInputField.class, method));
+			throw new GraphBuilderException(String.format("Expected annotation %s on method %s", GraphQLInputField.class, method));
 		}
 
 		this.name = annotation.name();

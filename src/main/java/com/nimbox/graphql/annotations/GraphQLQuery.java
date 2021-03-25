@@ -11,9 +11,9 @@ import com.nimbox.graphql.utils.ReservedStrings;
 @Target({ ElementType.METHOD })
 public @interface GraphQLQuery {
 
-	String name() default "";
+	String name();
 
-	String description() default "";
+	String description() default ReservedStrings.NULL;
 
 	String deprecationReason() default ReservedStrings.NULL;
 

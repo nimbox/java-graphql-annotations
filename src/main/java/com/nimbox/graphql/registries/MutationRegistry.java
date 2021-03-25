@@ -7,14 +7,14 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.nimbox.graphql.annotations.GraphQLMutation;
-import com.nimbox.graphql.types.GraphMutation;
+import com.nimbox.graphql.types.GraphMutationField;
 
 public class MutationRegistry {
 
 	// properties
 
 	private final GraphRegistry registry;
-	private Map<Class<?>, Map<Method, GraphMutation>> data = new HashMap<Class<?>, Map<Method, GraphMutation>>();
+	private Map<Class<?>, Map<Method, GraphMutationField>> data = new HashMap<Class<?>, Map<Method, GraphMutationField>>();
 
 	// constructors
 
@@ -22,7 +22,7 @@ public class MutationRegistry {
 		this.registry = registry;
 	}
 
-	public Map<Method, GraphMutation> of(final Class<?> typeClass) {
+	public Map<Method, GraphMutationField> of(final Class<?> typeClass) {
 
 		if (data.containsKey(typeClass)) {
 			return data.get(typeClass);
@@ -30,12 +30,12 @@ public class MutationRegistry {
 
 		// create
 
-		Map<Method, GraphMutation> queries = new HashMap<Method, GraphMutation>();
+		Map<Method, GraphMutationField> queries = new HashMap<Method, GraphMutationField>();
 		data.put(typeClass, queries);
 
-		for (Method method : typeClass.getMethods()) {
-			if (method.isAnnotationPresent(GraphQLMutation.class)) {
-				queries.put(method, new GraphMutation(registry, method));
+		for (Method fieldMethod : typeClass.getMethods()) {
+			if (fieldMethod.isAnnotationPresent(GraphQLMutation.class)) {
+				queries.put(fieldMethod, new GraphMutationField(registry, typeClass, fieldMethod));
 			}
 		}
 
@@ -47,7 +47,7 @@ public class MutationRegistry {
 
 	// getters
 
-	public List<GraphMutation> all() {
+	public List<GraphMutationField> all() {
 		return data.values().stream().flatMap(m -> m.values().stream()).collect(Collectors.toList());
 	}
 

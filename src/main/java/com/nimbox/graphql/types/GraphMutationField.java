@@ -4,7 +4,7 @@ import static com.nimbox.graphql.utils.IntrospectionUtils.getAnnotationOrThrow;
 
 import java.lang.reflect.Method;
 
-import com.nimbox.graphql.annotations.GraphQLQuery;
+import com.nimbox.graphql.annotations.GraphQLMutation;
 import com.nimbox.graphql.registries.GraphRegistry;
 import com.nimbox.graphql.runtime.RuntimeInstanceDataFetcher;
 import com.nimbox.graphql.runtime.RuntimeParameterFactory;
@@ -12,12 +12,12 @@ import com.nimbox.graphql.utils.ReservedStrings;
 
 import graphql.schema.DataFetcher;
 
-public class GraphQueryField extends GraphField {
+public class GraphMutationField extends GraphField {
 
 	// constructor
 
-	public GraphQueryField(final GraphRegistry registry, Class<?> typeClass, final Method fieldMethod) {
-		super(registry, new QueryDefinition(fieldMethod), typeClass, fieldMethod);
+	public GraphMutationField(final GraphRegistry registry, Class<?> typeClass, final Method fieldMethod) {
+		super(registry, new MutationDefinition(fieldMethod), typeClass, fieldMethod);
 	}
 
 	// methods
@@ -34,7 +34,7 @@ public class GraphQueryField extends GraphField {
 
 		StringBuilder builder = new StringBuilder();
 
-		builder.append("@").append(GraphQLQuery.class.getSimpleName()).append("(").append("name").append(" = ").append(name).append(")");
+		builder.append("@").append(GraphQLMutation.class.getSimpleName()).append("(").append("name").append(" = ").append(name).append(")");
 		builder.append(" ");
 		builder.append(valueClass);
 
@@ -44,12 +44,12 @@ public class GraphQueryField extends GraphField {
 
 	// classes
 
-	public static class QueryDefinition implements Definition {
+	public static class MutationDefinition implements Definition {
 
-		private final GraphQLQuery annotation;
+		private final GraphQLMutation annotation;
 
-		public QueryDefinition(final Method fieldMethod) {
-			annotation = getAnnotationOrThrow(GraphQLQuery.class, fieldMethod);
+		public MutationDefinition(final Method fieldMethod) {
+			annotation = getAnnotationOrThrow(GraphQLMutation.class, fieldMethod);
 		}
 
 		@Override

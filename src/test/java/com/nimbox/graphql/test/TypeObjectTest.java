@@ -3,14 +3,14 @@ package com.nimbox.graphql.test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.nimbox.graphql.GraphSchemaBuilder;
+import com.nimbox.graphql.GraphBuilder;
 import com.nimbox.graphql.annotations.GraphQLArgument;
-import com.nimbox.graphql.annotations.GraphQLQuery;
+import com.nimbox.graphql.annotations.GraphQLField;
 import com.nimbox.graphql.annotations.GraphQLType;
 import com.nimbox.graphql.registries.GraphRegistry;
 import com.nimbox.graphql.test.domain.HumanOperations;
-import com.nimbox.graphql.test.utils.GraphUtils;
 import com.nimbox.graphql.types.GraphOptionalDefinition;
+import com.nimbox.graphql.utils.GraphUtils;
 import com.nimbox.util.Alternative;
 
 import graphql.GraphQL;
@@ -33,19 +33,19 @@ class TypeObjectTest {
 
 		Object object = new @GraphQLType(name = "SomeThing", description = "SomeThing description.") Object() {
 
-			@GraphQLQuery(name = "method", description = "Method description.")
+			@GraphQLField(name = "method", description = "Method description.")
 			public String method(@GraphQLArgument(name = ARGUMENT) String argument) {
 				return "s";
 			}
 
-			@GraphQLQuery(name = "ass", description = "Method description.")
+			@GraphQLField(name = "ass", description = "Method description.")
 			public String method2(@GraphQLArgument(name = ARGUMENT) String argument) {
 				return "s";
 			}
 
 		};
 
-		GraphSchemaBuilder builder = new GraphSchemaBuilder();
+		GraphBuilder builder = new GraphBuilder();
 		builder.withOptional(Alternative.class, Alternative::undefined, Alternative::ofNullable);
 		builder.withOperations(HumanOperations.class);
 

@@ -1,6 +1,8 @@
 package com.nimbox.graphql.types;
 
 import static graphql.Scalars.GraphQLID;
+import static graphql.schema.GraphQLList.list;
+import static graphql.schema.GraphQLNonNull.nonNull;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.ParameterizedType;
@@ -8,7 +10,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.nimbox.graphql.GeneratorException;
+import com.nimbox.graphql.GraphBuilderException;
 import com.nimbox.graphql.annotations.GraphQLId;
 import com.nimbox.graphql.registries.GraphRegistry;
 
@@ -116,13 +118,13 @@ public class GraphValueClass {
 		GraphQLOutputType type = isId ? GraphQLID : registry.getOutputType(valueClass);
 
 		if (!isOptional()) {
-			type = GraphQLNonNull.nonNull(type);
+			type = nonNull(type);
 		}
 
 		if (isList()) {
-			type = GraphQLList.list(type);
+			type = list(type);
 			if (!isOptionalList()) {
-				type = GraphQLNonNull.nonNull(type);
+				type = nonNull(type);
 			}
 		}
 
@@ -135,13 +137,13 @@ public class GraphValueClass {
 		GraphQLInputType type = isId ? GraphQLID : registry.getInputType(valueClass);
 
 		if (!isOptional()) {
-			type = GraphQLNonNull.nonNull(type);
+			type = nonNull(type);
 		}
 
 		if (isList()) {
-			type = GraphQLList.list(type);
+			type = list(type);
 			if (!isOptionalList()) {
-				type = GraphQLNonNull.nonNull(type);
+				type = nonNull(type);
 			}
 		}
 
@@ -249,7 +251,7 @@ public class GraphValueClass {
 
 			}
 
-			throw new GeneratorException("Return type must be of a subset of Optional<List<Optional<T>>>");
+			throw new GraphBuilderException("Return type must be of a subset of Optional<List<Optional<T>>>");
 
 		}
 
@@ -272,7 +274,7 @@ public class GraphValueClass {
 
 			}
 
-			throw new GeneratorException("Return type must be of a subset of Optional<List<Optional<T>>>");
+			throw new GraphBuilderException("Return type must be of a subset of Optional<List<Optional<T>>>");
 
 		}
 
@@ -292,14 +294,14 @@ public class GraphValueClass {
 
 			}
 
-			throw new GeneratorException("Return type must be of a subset of Optional<List<Optional<T>>>");
+			throw new GraphBuilderException("Return type must be of a subset of Optional<List<Optional<T>>>");
 
 		}
 
 		private void complete(final Type type) {
 
 			if (type.equals(Void.TYPE)) {
-				throw new GeneratorException("Return type must not be void");
+				throw new GraphBuilderException("Return type must not be void");
 			}
 			this.valueClass = (Class<?>) type;
 

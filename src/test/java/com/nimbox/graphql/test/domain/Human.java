@@ -2,11 +2,11 @@ package com.nimbox.graphql.test.domain;
 
 import java.util.List;
 
-import com.nimbox.graphql.annotations.GraphQLQuery;
+import com.nimbox.graphql.annotations.GraphQLField;
 import com.nimbox.graphql.annotations.GraphQLType;
 
 @GraphQLType(name = "Human", description = "A humanoid creature in the Star Wars universe.", fieldOrder = { "id", "name", "homePlanet" })
-public class Human extends Character {
+public class Human extends Character implements HasPlanet {
 
 	private String homePlanet;
 
@@ -15,7 +15,7 @@ public class Human extends Character {
 		this.homePlanet = homePlanet;
 	}
 
-	@GraphQLQuery(name = "homePlanet", description = "The home planet of the human, or null if unknown.")
+	@GraphQLField(name = "homePlanet", description = "The home planet of the human, or null if unknown.")
 	public String getHomePlanet() {
 		return homePlanet;
 	}

@@ -33,9 +33,9 @@ public class QueryRegistry {
 		Map<Method, GraphQueryField> queries = new HashMap<Method, GraphQueryField>();
 		data.put(typeClass, queries);
 
-		for (Method method : typeClass.getMethods()) {
-			if (method.isAnnotationPresent(GraphQLQuery.class)) {
-				queries.put(method, new GraphQueryField(registry, typeClass, method));
+		for (Method fieldMethod : typeClass.getMethods()) {
+			if (fieldMethod.isAnnotationPresent(GraphQLQuery.class)) {
+				queries.put(fieldMethod, new GraphQueryField(registry, typeClass, fieldMethod));
 			}
 		}
 

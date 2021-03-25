@@ -1,17 +1,20 @@
 package com.nimbox.graphql.types;
 
-import static com.nimbox.graphql.utils.IntrospectionUtils.getTypeAnnotationOrThrow;
+import static com.nimbox.graphql.utils.IntrospectionUtils.getAllInterfaces;
+import static com.nimbox.graphql.utils.IntrospectionUtils.getAllSuperclasses;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.nimbox.graphql.annotations.GraphQLQuery;
-import com.nimbox.graphql.annotations.GraphQLType;
+import com.nimbox.graphql.annotations.GraphQLField;
+import com.nimbox.graphql.annotations.GraphQLInterface;
 import com.nimbox.graphql.registries.GraphRegistry;
-import com.nimbox.graphql.utils.ReservedStrings;
+import com.nimbox.graphql.registries.GraphRegistry.TypeAnnotation;
+import com.nimbox.graphql.registries.GraphRegistry.TypeAnnotation.Content;
 
 import graphql.com.google.common.base.Optional;
 
@@ -25,26 +28,51 @@ public class GraphObjectType {
 	private final String description;
 	private final List<String> fieldOrder;
 
+	private List<GraphInterfaceType> interfaces = new ArrayList<GraphInterfaceType>();
+
 	private final Map<Method, GraphObjectTypeField> fields = new HashMap<Method, GraphObjectTypeField>();
 
 	// constructors
 
 	public GraphObjectType(final GraphRegistry registry, final Class<?> objectTypeClass) {
 
-		GraphQLType annotation = getTypeAnnotationOrThrow(GraphQLType.class, objectTypeClass);
+		TypeAnnotation<?>.Content annotation = registry.getTypeAnnotationOrThrow(objectTypeClass);
 
 		// create
 
 		this.objectTypeClass = objectTypeClass;
 
-		this.name = annotation.name();
-		this.description = ReservedStrings.translate(annotation.description());
-		this.fieldOrder = Arrays.asList(annotation.fieldOrder());
+		this.name = annotation.getName();
+		this.description = annotation.getDescription();
+		this.fieldOrder = Arrays.asList(annotation.getFieldOrder());
+
+		System.out.println("XXX: " + this.name);
+
+		// extends interface
+
+		for (Class<?> c : getAllSuperclasses(objectTypeClass)) {
+			if (c.isAnnotationPresent(GraphQLInterface.class)) {
+				GraphInterfaceType interfaceType = registry.getInterfaces().of(c);
+				interfaceType.addImplementation(this);
+				interfaces.add(interfaceType);
+			}
+		}
+
+		// implements interfaces
+
+		for (Class<?> c : getAllInterfaces(objectTypeClass)) {
+			if (c.isAnnotationPresent(GraphQLInterface.class)) {
+				GraphInterfaceType interfaceType = registry.getInterfaces().of(c);
+				interfaceType.addImplementation(this);
+				interfaces.add(interfaceType);
+			}
+		}
 
 		// fields
 
 		for (Method method : objectTypeClass.getMethods()) {
-			if (method.isAnnotationPresent(GraphQLQuery.class)) {
+			if (registry.hasFieldAnnotation(method)) {
+				System.out.println("     " + method);
 				fields.put(method, new GraphObjectTypeField(registry, objectTypeClass, method));
 			}
 		}
@@ -71,6 +99,10 @@ public class GraphObjectType {
 
 	public Map<Method, GraphObjectTypeField> getFields() {
 		return fields;
+	}
+
+	public List<GraphInterfaceType> getInterfaces() {
+		return interfaces;
 	}
 
 	// builder
