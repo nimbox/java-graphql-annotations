@@ -1,6 +1,7 @@
 package com.nimbox.graphql.registries;
 
 import static com.nimbox.graphql.utils.IntrospectionUtils.getTypeAnnotationOrThrow;
+import static graphql.schema.GraphQLTypeReference.typeRef;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -9,6 +10,8 @@ import java.util.Map;
 import com.nimbox.graphql.GraphBuilderException;
 import com.nimbox.graphql.annotations.GraphQLEnum;
 import com.nimbox.graphql.types.GraphEnumType;
+
+import graphql.schema.GraphQLTypeReference;
 
 public class EnumTypeRegistry {
 
@@ -52,12 +55,20 @@ public class EnumTypeRegistry {
 
 	// getters
 
-	public Collection<GraphEnumType> all() {
-		return data.values();
+	public boolean contains(Class<?> enumTypeClass) {
+		return data.containsKey(enumTypeClass);
 	}
 
 	public GraphEnumType get(Class<?> enumTypeClass) {
 		return data.get(enumTypeClass);
+	}
+
+	public GraphQLTypeReference getGraphQLType(Class<?> enumTypeClass) {
+		return typeRef(data.get(enumTypeClass).getName());
+	}
+
+	public Collection<GraphEnumType> all() {
+		return data.values();
 	}
 
 }

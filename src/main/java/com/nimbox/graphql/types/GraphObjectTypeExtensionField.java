@@ -25,7 +25,7 @@ public class GraphObjectTypeExtensionField extends GraphObjectTypeField {
 
 	@Override
 	public DataFetcher<?> getFetcher(RuntimeParameterFactory factory) {
-		return new RuntimeSourceExtensionDataFetcher<>(factory, typeClass, typeMethod, parameters, sourceObjectTypeClass);
+		return new RuntimeSourceExtensionDataFetcher<>(factory, container, method, parameters, sourceObjectTypeClass);
 	}
 
 }

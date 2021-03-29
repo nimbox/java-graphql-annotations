@@ -17,10 +17,10 @@ import org.junit.jupiter.api.Test;
 
 import com.nimbox.graphql.GraphBuilderException;
 import com.nimbox.graphql.annotations.GraphQLId;
+import com.nimbox.graphql.definitions.GraphInputTypeDefinition;
 import com.nimbox.graphql.registries.GraphRegistry;
 import com.nimbox.graphql.test.TypeObjectTest.ExecutionContext;
 import com.nimbox.graphql.types.GraphOptionalDefinition;
-import com.nimbox.graphql.types.GraphValueClass;
 import com.nimbox.util.Alternative;
 
 class GraphValueClassReturnTest {
@@ -48,7 +48,7 @@ class GraphValueClassReturnTest {
 		Method method = Arrays.stream(klass.getMethods()).filter(m -> m.getName().equals("method")).findFirst().get();
 
 		assertThrows(GraphBuilderException.class, () -> {
-			new GraphValueClass(registry, method, method.getGenericReturnType());
+			new GraphInputTypeDefinition(registry, method, method.getGenericReturnType());
 		});
 
 	}
@@ -67,9 +67,9 @@ class GraphValueClassReturnTest {
 
 		Class<?> klass = k.getClass();
 		Method method = Arrays.stream(klass.getMethods()).filter(m -> m.getName().equals("method")).findFirst().get();
-		GraphValueClass returnClass = new GraphValueClass(registry, method, method.getGenericReturnType());
+		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry, method, method.getGenericReturnType());
 
-		assertEquals(String.class, returnClass.getValueClass());
+		assertEquals(String.class, returnClass.getType());
 		assertTrue(returnClass.isId());
 		assertFalse(returnClass.isOptional());
 		assertFalse(returnClass.isList());
@@ -89,9 +89,9 @@ class GraphValueClassReturnTest {
 
 		Class<?> klass = k.getClass();
 		Method method = Arrays.stream(klass.getMethods()).filter(m -> m.getName().equals("method")).findFirst().get();
-		GraphValueClass returnClass = new GraphValueClass(registry, method, method.getGenericReturnType());
+		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry, method, method.getGenericReturnType());
 
-		assertEquals(Integer.class, returnClass.getValueClass());
+		assertEquals(Integer.class, returnClass.getType());
 		assertTrue(returnClass.isId());
 		assertFalse(returnClass.isOptional());
 		assertFalse(returnClass.isList());
@@ -113,9 +113,9 @@ class GraphValueClassReturnTest {
 
 		Class<?> klass = k.getClass();
 		Method method = Arrays.stream(klass.getMethods()).filter(m -> m.getName().equals("method")).findFirst().get();
-		GraphValueClass returnClass = new GraphValueClass(registry, method, method.getGenericReturnType());
+		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry, method, method.getGenericReturnType());
 
-		assertEquals(String.class, returnClass.getValueClass());
+		assertEquals(String.class, returnClass.getType());
 		assertFalse(returnClass.isId());
 		assertFalse(returnClass.isOptional());
 		assertFalse(returnClass.isList());
@@ -135,9 +135,9 @@ class GraphValueClassReturnTest {
 
 		Class<?> klass = k.getClass();
 		Method method = Arrays.stream(klass.getMethods()).filter(m -> m.getName().equals("method")).findFirst().get();
-		GraphValueClass returnClass = new GraphValueClass(registry, method, method.getGenericReturnType());
+		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry, method, method.getGenericReturnType());
 
-		assertEquals(String.class, returnClass.getValueClass());
+		assertEquals(String.class, returnClass.getType());
 		assertFalse(returnClass.isId());
 		assertTrue(returnClass.isOptional());
 		assertFalse(returnClass.isList());
@@ -157,9 +157,9 @@ class GraphValueClassReturnTest {
 
 		Class<?> klass = k.getClass();
 		Method method = Arrays.stream(klass.getMethods()).filter(m -> m.getName().equals("method")).findFirst().get();
-		GraphValueClass returnClass = new GraphValueClass(registry, method, method.getGenericReturnType());
+		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry, method, method.getGenericReturnType());
 
-		assertEquals(String.class, returnClass.getValueClass());
+		assertEquals(String.class, returnClass.getType());
 		assertFalse(returnClass.isId());
 		assertTrue(returnClass.isOptional());
 		assertFalse(returnClass.isList());
@@ -181,9 +181,9 @@ class GraphValueClassReturnTest {
 
 		Class<?> klass = k.getClass();
 		Method method = Arrays.stream(klass.getMethods()).filter(m -> m.getName().equals("method")).findFirst().get();
-		GraphValueClass returnClass = new GraphValueClass(registry, method, method.getGenericReturnType());
+		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry, method, method.getGenericReturnType());
 
-		assertEquals(String.class, returnClass.getValueClass());
+		assertEquals(String.class, returnClass.getType());
 		assertFalse(returnClass.isId());
 		assertFalse(returnClass.isOptional());
 		assertTrue(returnClass.isList());
@@ -203,9 +203,9 @@ class GraphValueClassReturnTest {
 
 		Class<?> klass = k.getClass();
 		Method method = Arrays.stream(klass.getMethods()).filter(m -> m.getName().equals("method")).findFirst().get();
-		GraphValueClass returnClass = new GraphValueClass(registry, method, method.getGenericReturnType());
+		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry, method, method.getGenericReturnType());
 
-		assertEquals(String.class, returnClass.getValueClass());
+		assertEquals(String.class, returnClass.getType());
 		assertFalse(returnClass.isId());
 		assertTrue(returnClass.isOptional());
 		assertTrue(returnClass.isList());
@@ -225,9 +225,9 @@ class GraphValueClassReturnTest {
 
 		Class<?> klass = k.getClass();
 		Method method = Arrays.stream(klass.getMethods()).filter(m -> m.getName().equals("method")).findFirst().get();
-		GraphValueClass returnClass = new GraphValueClass(registry, method, method.getGenericReturnType());
+		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry, method, method.getGenericReturnType());
 
-		assertEquals(String.class, returnClass.getValueClass());
+		assertEquals(String.class, returnClass.getType());
 		assertFalse(returnClass.isId());
 		assertTrue(returnClass.isOptional());
 		assertTrue(returnClass.isList());
@@ -249,9 +249,9 @@ class GraphValueClassReturnTest {
 
 		Class<?> klass = k.getClass();
 		Method method = Arrays.stream(klass.getMethods()).filter(m -> m.getName().equals("method")).findFirst().get();
-		GraphValueClass returnClass = new GraphValueClass(registry, method, method.getGenericReturnType());
+		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry, method, method.getGenericReturnType());
 
-		assertEquals(String.class, returnClass.getValueClass());
+		assertEquals(String.class, returnClass.getType());
 		assertFalse(returnClass.isId());
 		assertFalse(returnClass.isOptional());
 		assertTrue(returnClass.isList());
@@ -271,9 +271,9 @@ class GraphValueClassReturnTest {
 
 		Class<?> klass = k.getClass();
 		Method method = Arrays.stream(klass.getMethods()).filter(m -> m.getName().equals("method")).findFirst().get();
-		GraphValueClass returnClass = new GraphValueClass(registry, method, method.getGenericReturnType());
+		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry, method, method.getGenericReturnType());
 
-		assertEquals(String.class, returnClass.getValueClass());
+		assertEquals(String.class, returnClass.getType());
 		assertFalse(returnClass.isId());
 		assertTrue(returnClass.isOptional());
 		assertTrue(returnClass.isList());
@@ -293,9 +293,9 @@ class GraphValueClassReturnTest {
 
 		Class<?> klass = k.getClass();
 		Method method = Arrays.stream(klass.getMethods()).filter(m -> m.getName().equals("method")).findFirst().get();
-		GraphValueClass returnClass = new GraphValueClass(registry, method, method.getGenericReturnType());
+		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry, method, method.getGenericReturnType());
 
-		assertEquals(String.class, returnClass.getValueClass());
+		assertEquals(String.class, returnClass.getType());
 		assertFalse(returnClass.isId());
 		assertTrue(returnClass.isOptional());
 		assertTrue(returnClass.isList());
@@ -317,9 +317,9 @@ class GraphValueClassReturnTest {
 
 		Class<?> klass = k.getClass();
 		Method method = Arrays.stream(klass.getMethods()).filter(m -> m.getName().equals("method")).findFirst().get();
-		GraphValueClass returnClass = new GraphValueClass(registry, method, method.getGenericReturnType());
+		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry, method, method.getGenericReturnType());
 
-		assertEquals(String.class, returnClass.getValueClass());
+		assertEquals(String.class, returnClass.getType());
 		assertFalse(returnClass.isId());
 		assertFalse(returnClass.isOptional());
 		assertTrue(returnClass.isList());
@@ -339,9 +339,9 @@ class GraphValueClassReturnTest {
 
 		Class<?> klass = k.getClass();
 		Method method = Arrays.stream(klass.getMethods()).filter(m -> m.getName().equals("method")).findFirst().get();
-		GraphValueClass returnClass = new GraphValueClass(registry, method, method.getGenericReturnType());
+		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry, method, method.getGenericReturnType());
 
-		assertEquals(String.class, returnClass.getValueClass());
+		assertEquals(String.class, returnClass.getType());
 		assertFalse(returnClass.isId());
 		assertTrue(returnClass.isOptional());
 		assertTrue(returnClass.isList());
@@ -361,9 +361,9 @@ class GraphValueClassReturnTest {
 
 		Class<?> klass = k.getClass();
 		Method method = Arrays.stream(klass.getMethods()).filter(m -> m.getName().equals("method")).findFirst().get();
-		GraphValueClass returnClass = new GraphValueClass(registry, method, method.getGenericReturnType());
+		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry, method, method.getGenericReturnType());
 
-		assertEquals(String.class, returnClass.getValueClass());
+		assertEquals(String.class, returnClass.getType());
 		assertFalse(returnClass.isId());
 		assertTrue(returnClass.isOptional());
 		assertTrue(returnClass.isList());
@@ -386,9 +386,9 @@ class GraphValueClassReturnTest {
 		Class<?> klass = k.getClass();
 		Method method = Arrays.stream(klass.getMethods()).filter(m -> m.getName().equals("method")).findFirst().get();
 
-		GraphValueClass returnType = new GraphValueClass(registry, method, method.getGenericReturnType());
+		GraphInputTypeDefinition returnType = new GraphInputTypeDefinition(registry, method, method.getGenericReturnType());
 		assertFalse(returnType.isId());
-		assertEquals(String.class, returnType.getValueClass());
+		assertEquals(String.class, returnType.getType());
 		assertTrue(returnType.isOptional());
 		assertTrue(returnType.isList());
 		assertTrue(returnType.isOptionalList());
@@ -413,7 +413,7 @@ class GraphValueClassReturnTest {
 		Method method = Arrays.stream(klass.getMethods()).filter(m -> m.getName().equals("method")).findFirst().get();
 
 		assertThrows(GraphBuilderException.class, () -> {
-			new GraphValueClass(registry, method, method.getGenericReturnType());
+			new GraphInputTypeDefinition(registry, method, method.getGenericReturnType());
 		});
 
 	}
@@ -432,7 +432,7 @@ class GraphValueClassReturnTest {
 		Method method = Arrays.stream(klass.getMethods()).filter(m -> m.getName().equals("method")).findFirst().get();
 
 		assertThrows(GraphBuilderException.class, () -> {
-			new GraphValueClass(registry, method, method.getGenericReturnType());
+			new GraphInputTypeDefinition(registry, method, method.getGenericReturnType());
 		});
 
 	}
@@ -451,7 +451,7 @@ class GraphValueClassReturnTest {
 		Method method = Arrays.stream(klass.getMethods()).filter(m -> m.getName().equals("method")).findFirst().get();
 
 		assertThrows(GraphBuilderException.class, () -> {
-			new GraphValueClass(registry, method, method.getGenericReturnType());
+			new GraphInputTypeDefinition(registry, method, method.getGenericReturnType());
 		});
 
 	}
@@ -470,7 +470,7 @@ class GraphValueClassReturnTest {
 		Method method = Arrays.stream(klass.getMethods()).filter(m -> m.getName().equals("method")).findFirst().get();
 
 		assertThrows(GraphBuilderException.class, () -> {
-			new GraphValueClass(registry, method, method.getGenericReturnType());
+			new GraphInputTypeDefinition(registry, method, method.getGenericReturnType());
 		});
 
 	}

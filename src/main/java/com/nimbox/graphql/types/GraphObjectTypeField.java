@@ -14,15 +14,15 @@ public class GraphObjectTypeField extends GraphField {
 
 	// constructor
 
-	public GraphObjectTypeField(final GraphRegistry registry, Class<?> typeClass, final Method fieldMethod) {
-		super(registry, new ObjetTypeDefinition(registry, fieldMethod), typeClass, fieldMethod);
+	public GraphObjectTypeField(final GraphRegistry registry, Class<?> container, final Method method) {
+		super(registry, new ObjetTypeAnnotation(registry, method), container, method);
 	}
 
 	// methods
 
 	@Override
 	public DataFetcher<?> getFetcher(RuntimeParameterFactory factory) {
-		return new RuntimeSourceDataFetcher<>(factory, typeClass, typeMethod, parameters);
+		return new RuntimeSourceDataFetcher<>(factory, container, method, parameters);
 	}
 
 	// object overrides
@@ -34,7 +34,7 @@ public class GraphObjectTypeField extends GraphField {
 
 		builder.append("@").append(GraphQLField.class.getSimpleName()).append("(").append("name").append(" = ").append(name).append(")");
 		builder.append(" ");
-		builder.append(valueClass);
+		builder.append(container);
 
 		return builder.toString();
 
@@ -42,12 +42,12 @@ public class GraphObjectTypeField extends GraphField {
 
 	// classes
 
-	public static class ObjetTypeDefinition implements Definition {
+	public static class ObjetTypeAnnotation implements TypeAnnotation {
 
 		private final FieldAnnotation<?>.Content annotation;
 
-		public ObjetTypeDefinition(final GraphRegistry registry, final Method fieldMethod) {
-			annotation = registry.getFieldAnnotationOrThrow(fieldMethod);
+		public ObjetTypeAnnotation(final GraphRegistry registry, final Method method) {
+			annotation = registry.getFieldAnnotationOrThrow(method);
 		}
 
 		@Override

@@ -2,14 +2,32 @@
 
 Yet another graphql annotation processor based on https://github.com/leangen/graphql-spqr.
 
+
+Inputs
+
+	Scalar, Enum, or Input Object
+
+Outputs
+
+	Scalar, Enum, Object, Interface, or Union
+
 ## Optionals
 
-* `GraphQLOutputType`s can only be described with `Optional`.
-* `GraphQLInputType`s can be described with `Optional` or any other `Optional` alternative registered.
+* `GraphQLOutputType` can only be described with `Optional`.
+* `GraphQLInputType` can be described with `Optional` or any other `Optional` alternative registered.
   Usually `Alternative` which better handles the `undefined` type.
   
-  
-  
+
+```
+@GraphQLField
+GraphOuput method(GraphArguments(GraphInput)... arguments, GraphContext... contexts)
+```
+
+```
+@GraphQLInputField
+GraphInput method()
+```
+
 ## Query and mutation methods
 
 This library allows automatic injection of parameters into query and mutation methods. There are two types

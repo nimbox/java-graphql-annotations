@@ -17,14 +17,14 @@ public class GraphQueryField extends GraphField {
 	// constructor
 
 	public GraphQueryField(final GraphRegistry registry, Class<?> typeClass, final Method fieldMethod) {
-		super(registry, new QueryDefinition(fieldMethod), typeClass, fieldMethod);
+		super(registry, new QueryAnnotation(fieldMethod), typeClass, fieldMethod);
 	}
 
 	// methods
 
 	@Override
 	public DataFetcher<?> getFetcher(RuntimeParameterFactory factory) {
-		return new RuntimeInstanceDataFetcher<>(factory, typeClass, typeMethod, parameters);
+		return new RuntimeInstanceDataFetcher<>(factory, container, method, parameters);
 	}
 
 	// object overrides
@@ -36,7 +36,7 @@ public class GraphQueryField extends GraphField {
 
 		builder.append("@").append(GraphQLQuery.class.getSimpleName()).append("(").append("name").append(" = ").append(name).append(")");
 		builder.append(" ");
-		builder.append(valueClass);
+		builder.append(container);
 
 		return builder.toString();
 
@@ -44,11 +44,11 @@ public class GraphQueryField extends GraphField {
 
 	// classes
 
-	public static class QueryDefinition implements Definition {
+	public static class QueryAnnotation implements TypeAnnotation {
 
 		private final GraphQLQuery annotation;
 
-		public QueryDefinition(final Method fieldMethod) {
+		public QueryAnnotation(final Method fieldMethod) {
 			annotation = getAnnotationOrThrow(GraphQLQuery.class, fieldMethod);
 		}
 

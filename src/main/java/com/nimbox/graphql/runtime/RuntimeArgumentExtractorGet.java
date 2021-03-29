@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.nimbox.graphql.types.GraphValueClass;
+import com.nimbox.graphql.definitions.GraphInputTypeDefinition;
 
 class RuntimeArgumentExtractorGet implements RuntimeArgumentExtractor {
 
@@ -19,7 +19,7 @@ class RuntimeArgumentExtractorGet implements RuntimeArgumentExtractor {
 	public Object apply(Map<String, Object> arguments, RuntimeParameter parameter) throws Exception {
 
 		String name = parameter.name;
-		GraphValueClass valueClass = parameter.type;
+		GraphInputTypeDefinition valueClass = parameter.type;
 
 		if (!arguments.containsKey(name)) {
 			if (valueClass.isList()) {

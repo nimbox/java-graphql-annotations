@@ -1,5 +1,7 @@
 package com.nimbox.graphql.registries;
 
+import static graphql.schema.GraphQLTypeReference.typeRef;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -7,6 +9,8 @@ import java.util.Map;
 import com.nimbox.graphql.GraphBuilderException;
 import com.nimbox.graphql.annotations.GraphQLInput;
 import com.nimbox.graphql.types.GraphInputObjectType;
+
+import graphql.schema.GraphQLTypeReference;
 
 public class InputObjectTypeRegistry {
 
@@ -58,8 +62,16 @@ public class InputObjectTypeRegistry {
 
 	// getters
 
+	public boolean contains(Class<?> inputObjectTypeClass) {
+		return data.containsKey(inputObjectTypeClass);
+	}
+
 	public GraphInputObjectType get(Class<?> object) {
 		return data.get(object);
+	}
+
+	public GraphQLTypeReference getGraphQLType(Class<?> inputObjectTypeClass) {
+		return typeRef(data.get(inputObjectTypeClass).getName());
 	}
 
 	public Collection<GraphInputObjectType> all() {

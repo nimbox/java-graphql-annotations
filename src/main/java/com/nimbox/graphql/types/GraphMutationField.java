@@ -16,15 +16,15 @@ public class GraphMutationField extends GraphField {
 
 	// constructor
 
-	public GraphMutationField(final GraphRegistry registry, Class<?> typeClass, final Method fieldMethod) {
-		super(registry, new MutationDefinition(fieldMethod), typeClass, fieldMethod);
+	public GraphMutationField(final GraphRegistry registry, Class<?> container, final Method method) {
+		super(registry, new MutationAnnotation(method), container, method);
 	}
 
 	// methods
 
 	@Override
 	public DataFetcher<?> getFetcher(RuntimeParameterFactory factory) {
-		return new RuntimeInstanceDataFetcher<>(factory, typeClass, typeMethod, parameters);
+		return new RuntimeInstanceDataFetcher<>(factory, container, method, parameters);
 	}
 
 	// object overrides
@@ -36,7 +36,7 @@ public class GraphMutationField extends GraphField {
 
 		builder.append("@").append(GraphQLMutation.class.getSimpleName()).append("(").append("name").append(" = ").append(name).append(")");
 		builder.append(" ");
-		builder.append(valueClass);
+		builder.append(container);
 
 		return builder.toString();
 
@@ -44,11 +44,11 @@ public class GraphMutationField extends GraphField {
 
 	// classes
 
-	public static class MutationDefinition implements Definition {
+	public static class MutationAnnotation implements TypeAnnotation {
 
 		private final GraphQLMutation annotation;
 
-		public MutationDefinition(final Method fieldMethod) {
+		public MutationAnnotation(final Method fieldMethod) {
 			annotation = getAnnotationOrThrow(GraphQLMutation.class, fieldMethod);
 		}
 

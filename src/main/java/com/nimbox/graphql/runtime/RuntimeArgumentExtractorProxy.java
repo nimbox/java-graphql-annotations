@@ -8,9 +8,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.nimbox.graphql.definitions.GraphInputTypeDefinition;
 import com.nimbox.graphql.types.GraphInputObjectType;
 import com.nimbox.graphql.types.GraphInputObjectTypeField;
-import com.nimbox.graphql.types.GraphValueClass;
 
 public class RuntimeArgumentExtractorProxy implements RuntimeArgumentExtractor {
 
@@ -29,7 +29,7 @@ public class RuntimeArgumentExtractorProxy implements RuntimeArgumentExtractor {
 
 		this.typeClass = inputObjectType.getInputObjectTypeClass();
 		for (Map.Entry<Method, GraphInputObjectTypeField> e : inputObjectType.getFields().entrySet()) {
-			fields.put(e.getKey(), new RuntimeParameter(e.getValue().getValueClass(), e.getValue().getName()));
+			fields.put(e.getKey(), new RuntimeParameter(e.getValue().getReturnInput().getDefinition(), e.getValue().getName()));
 		}
 
 	}
@@ -41,7 +41,7 @@ public class RuntimeArgumentExtractorProxy implements RuntimeArgumentExtractor {
 	public Object apply(Map<String, Object> arguments, RuntimeParameter parameter) throws Exception {
 
 		String name = parameter.name;
-		GraphValueClass valueClass = parameter.type;
+		GraphInputTypeDefinition valueClass = parameter.type;
 
 		if (!arguments.containsKey(name)) {
 			if (valueClass.isList()) {

@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 
 import com.nimbox.graphql.GraphBuilderException;
 import com.nimbox.graphql.annotations.GraphQLInputField;
+import com.nimbox.graphql.inputs.GraphInput;
 import com.nimbox.graphql.registries.GraphRegistry;
 import com.nimbox.graphql.utils.ReservedStrings;
 
@@ -15,7 +16,7 @@ public class GraphInputObjectTypeField {
 	private final String description;
 	private final Object defaultValue;
 
-	private final GraphValueClass valueType;
+	private final GraphInput returnInput;
 
 	// constructor
 
@@ -30,7 +31,7 @@ public class GraphInputObjectTypeField {
 		this.description = ReservedStrings.translate(annotation.description());
 		this.defaultValue = null;
 
-		this.valueType = new GraphValueClass(registry, method, method.getGenericReturnType());
+		this.returnInput = GraphInput.of(registry, GraphQLInputField.class, this.name, method);
 
 	}
 
@@ -44,8 +45,12 @@ public class GraphInputObjectTypeField {
 		return description;
 	}
 
-	public GraphValueClass getValueClass() {
-		return valueType;
+	public Object getDefaultValue() {
+		return defaultValue;
+	}
+
+	public GraphInput getReturnInput() {
+		return returnInput;
 	}
 
 	// builder
@@ -61,7 +66,8 @@ public class GraphInputObjectTypeField {
 		if (defaultValue != null) {
 			builder.defaultValue(defaultValue);
 		}
-		builder.type(valueType.getGraphQLInputValueType(registry));
+
+		builder.type(returnInput.getGraphQLInputType(registry));
 
 		return builder;
 
@@ -75,7 +81,7 @@ public class GraphInputObjectTypeField {
 
 		builder.append("@GraphQLInputField").append("(").append("name").append(" = ").append(name).append(")");
 		builder.append(" ");
-		builder.append(valueType);
+		builder.append(returnInput.getDefinition());
 
 		return builder.toString();
 

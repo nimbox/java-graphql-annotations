@@ -41,7 +41,7 @@ public class RuntimeArgumentFactory {
 	// getters
 
 	public Object get(Map<String, Object> arguments, RuntimeParameter parameter) throws Exception {
-		return extractors.get(parameter.type.getValueClass()).apply(arguments, parameter);
+		return extractors.get(parameter.type.getType()).apply(arguments, parameter);
 	}
 
 	// object overrides

@@ -2,59 +2,29 @@ package com.nimbox.graphql.parameters;
 
 import java.lang.reflect.Parameter;
 
-import com.nimbox.graphql.GraphBuilderException;
 import com.nimbox.graphql.annotations.GraphQLArgument;
-import com.nimbox.graphql.annotations.GraphQLEnum;
-import com.nimbox.graphql.annotations.GraphQLInput;
+import com.nimbox.graphql.definitions.GraphInputTypeDefinition;
+import com.nimbox.graphql.inputs.GraphInput;
 import com.nimbox.graphql.registries.GraphRegistry;
 import com.nimbox.graphql.runtime.RuntimeParameter;
-import com.nimbox.graphql.types.GraphValueClass;
 import com.nimbox.graphql.utils.ReservedStrings;
-
-import graphql.schema.DataFetchingEnvironment;
 
 public class GraphParameterArgument extends GraphParameter {
 
 	// properties
 
-	protected final String name;
-	protected final String description;
+	final String name;
+	final String description;
+	final GraphInput input;
 
 	// constructors
 
-	public GraphParameterArgument(final GraphRegistry registry, final Parameter parameter, final GraphValueClass valueType) {
-		super(registry, parameter, valueType, GraphQLArgument.class);
+	GraphParameterArgument(final GraphRegistry registry, final Parameter parameter) {
 
 		GraphQLArgument annotation = parameter.getAnnotation(GraphQLArgument.class);
-
 		this.name = annotation.name();
-		this.description = ReservedStrings.isDefined(annotation.description()) ? annotation.description() : null;
-
-	}
-
-	public static GraphParameterArgument of(final GraphRegistry registry, final Parameter fieldParameter) {
-
-		GraphValueClass valueType = new GraphValueClass(registry, fieldParameter, fieldParameter.getParameterizedType());
-
-		if (registry.getScalars().contains(valueType.getValueClass())) {
-			return new GraphParameterArgumentScalar(registry, fieldParameter, valueType);
-		}
-
-		if (valueType.getValueClass().isAnnotationPresent(GraphQLInput.class)) {
-			registry.getInputObjects().of(valueType.getValueClass());
-			return new GraphParameterArgumentInput(registry, fieldParameter, valueType);
-		}
-
-		if (valueType.getValueClass().isAnnotationPresent(GraphQLEnum.class)) {
-			registry.getEnums().of(valueType.getValueClass());
-			return new GraphParameterArgumentEnum(registry, fieldParameter, valueType);
-		}
-
-		throw new GraphBuilderException(String.format("Parameter %s annotated with %s does not have a recognized return type %s", //
-				fieldParameter.getName(), //
-				GraphQLArgument.class, //
-				valueType.getValueClass()) //
-		);
+		this.description = ReservedStrings.translate(annotation.description());
+		this.input = GraphInput.of(registry, GraphQLArgument.class, this.name, parameter);
 
 	}
 
@@ -69,16 +39,16 @@ public class GraphParameterArgument extends GraphParameter {
 	}
 
 	@Override
-	public RuntimeParameter getRuntimeParameter() {
-		return new RuntimeParameter(valueClass, name);
+	public GraphInputTypeDefinition getDefinition() {
+		return input.getDefinition();
 	}
 
 	@Override
-	public <T> T getParameterValue(DataFetchingEnvironment environment) throws Exception {
-		return null;
+	public RuntimeParameter getRuntimeParameter() {
+		return new RuntimeParameter(input.getDefinition(), name);
 	}
 
-	// methods
+	// builder
 
 	public graphql.schema.GraphQLArgument.Builder newArgument(GraphRegistry registry) {
 
@@ -88,7 +58,7 @@ public class GraphParameterArgument extends GraphParameter {
 		if (this.description != null) {
 			builder.description(description);
 		}
-		builder.type(valueClass.getGraphQLInputValueType(registry));
+		builder.type(input.getGraphQLInputType(registry));
 
 		return builder;
 
@@ -104,7 +74,7 @@ public class GraphParameterArgument extends GraphParameter {
 		builder.append("@").append(GraphQLArgument.class);
 		builder.append("(").append("name").append(" = ").append(name).append(")");
 		builder.append(" ");
-		builder.append(valueClass.getValueClass());
+		builder.append(input.getDefinition());
 
 		return builder.toString();
 

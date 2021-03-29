@@ -23,6 +23,7 @@ import com.nimbox.graphql.types.GraphObjectType;
 import com.nimbox.graphql.types.GraphOptionalDefinition;
 import com.nimbox.graphql.utils.ReservedStrings;
 
+import graphql.schema.DataFetcher;
 import graphql.schema.GraphQLInputType;
 import graphql.schema.GraphQLOutputType;
 import graphql.schema.GraphQLTypeReference;
@@ -36,7 +37,7 @@ public class GraphRegistry {
 
 	//
 
-	private final Class<?> context;
+	private final Map<Class<?>, DataFetcher<?>> contexts;
 	private final Map<Class<?>, GraphOptionalDefinition<?>> optionals;
 
 	//
@@ -83,7 +84,7 @@ public class GraphRegistry {
 
 		//
 
-		this.context = context;
+		this.contexts = new HashMap<Class<?>, DataFetcher<?>>();
 		this.optionals = new HashMap<Class<?>, GraphOptionalDefinition<?>>();
 		this.withOptional(new GraphOptionalDefinition<>(Optional.class, () -> null, Optional::ofNullable));
 
@@ -165,8 +166,8 @@ public class GraphRegistry {
 
 	// getters and setters
 
-	public Class<?> getContext() {
-		return context;
+	public Map<Class<?>, DataFetcher<?>> getContexts() {
+		return contexts;
 	}
 
 	public boolean isOptional(Class<?> klass) {
@@ -228,7 +229,7 @@ public class GraphRegistry {
 
 	public GraphQLOutputType getOutputType(Class<?> valueClass) {
 
-		GraphQLOutputType scalar = getScalars().getScalarType(valueClass);
+		GraphQLOutputType scalar = getScalars().getGraphQLType(valueClass);
 		if (scalar != null) {
 			return scalar;
 		}
@@ -249,7 +250,7 @@ public class GraphRegistry {
 
 	public GraphQLInputType getInputType(Class<?> valueClass) {
 
-		GraphQLInputType scalar = getScalars().getScalarType(valueClass);
+		GraphQLInputType scalar = getScalars().getGraphQLType(valueClass);
 		if (scalar != null) {
 			return scalar;
 		}

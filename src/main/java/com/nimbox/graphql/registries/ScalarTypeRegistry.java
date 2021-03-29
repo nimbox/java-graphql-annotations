@@ -69,13 +69,13 @@ public class ScalarTypeRegistry {
 
 	}
 
-	// methods
+	// getters
 
-	public boolean contains(Class<?> valueType) {
-		return defaults.containsKey(valueType) || data.containsKey(valueType);
+	public boolean contains(Class<?> scalarTypeClass) {
+		return defaults.containsKey(scalarTypeClass) || data.containsKey(scalarTypeClass);
 	}
 
-	public GraphQLScalarType getScalarType(Class<?> valueClass) {
+	public GraphQLScalarType getGraphQLType(Class<?> valueClass) {
 
 		if (defaults.containsKey(valueClass)) {
 			return defaults.get(valueClass);
@@ -85,9 +85,6 @@ public class ScalarTypeRegistry {
 			GraphScalarType scalarType = data.get(valueClass);
 			return scalarType.built();
 		}
-
-		System.out.println("VALUECLASS: " + valueClass);
-		System.out.println(data.keySet());
 
 		return null;
 

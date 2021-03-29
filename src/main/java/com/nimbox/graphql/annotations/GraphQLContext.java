@@ -11,6 +11,6 @@ import com.nimbox.graphql.utils.ReservedStrings;
 @Target(ElementType.PARAMETER)
 public @interface GraphQLContext {
 
-	String name() default ReservedStrings.UNDEFINED;
+	String name() default ReservedStrings.NULL;
 
 }
