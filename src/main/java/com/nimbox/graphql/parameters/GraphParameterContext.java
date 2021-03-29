@@ -2,8 +2,8 @@ package com.nimbox.graphql.parameters;
 
 import java.lang.reflect.Parameter;
 
-import com.nimbox.graphgl.contexts.GraphContext;
 import com.nimbox.graphql.annotations.GraphQLContext;
+import com.nimbox.graphql.contexts.GraphContext;
 import com.nimbox.graphql.definitions.GraphInputTypeDefinition;
 import com.nimbox.graphql.registries.GraphRegistry;
 import com.nimbox.graphql.runtime.RuntimeParameter;
