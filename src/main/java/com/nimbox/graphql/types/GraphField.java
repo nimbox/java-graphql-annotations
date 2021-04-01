@@ -4,9 +4,10 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import com.nimbox.graphql.annotations.GraphQLField;
-import com.nimbox.graphql.outputs.GraphOutput;
+import com.nimbox.graphql.nodes.GraphOutput;
 import com.nimbox.graphql.parameters.GraphParameter;
 import com.nimbox.graphql.parameters.GraphParameterArgument;
 import com.nimbox.graphql.registries.GraphRegistry;
@@ -18,8 +19,8 @@ public abstract class GraphField {
 
 	// properties
 
-	protected final Class<?> container;
-	protected final Method method;
+	final Class<?> container;
+	final Method method;
 
 	protected final String name;
 	protected final String description;
@@ -30,43 +31,47 @@ public abstract class GraphField {
 
 	// constructor
 
-	GraphField(final GraphRegistry registry, final TypeAnnotation definition, final Class<?> container, final Method method) {
+	GraphField(final GraphRegistry registry, final Class<?> container, final Method method, final Data data) {
 
 		// create
 
 		this.container = container;
 		this.method = method;
 
-		this.name = definition.getName();
-		this.description = definition.getDescription();
-		this.deprecationReason = definition.getDeprecationReason();
+		this.name = data.getName();
+		this.description = data.getDescription();
+		this.deprecationReason = data.getDeprecationReason();
 
-		this.definition = GraphOutput.of(registry, null, this.name, method);
-
-//		if (this.output..getType().isAnnotationPresent(GraphQLType.class)) {
-//			registry.getObjects().of(this.valueClass.getType());
-//		}
+		this.definition = GraphOutput.of(registry, this.name, method);
 
 		// parameters
 
-		for (Parameter p : method.getParameters()) {
-			this.parameters.add(GraphParameter.of(registry, p));
+		for (Parameter parameter : method.getParameters()) {
+			this.parameters.add(GraphParameter.of(registry, method, parameter));
 		}
 
 	}
 
 	// getters
 
+	public Class<?> getContainer() {
+		return container;
+	}
+
+	public Method getMethod() {
+		return method;
+	}
+
 	public String getName() {
 		return name;
 	}
 
-	public String getDescription() {
-		return description;
+	public Optional<String> getDescription() {
+		return Optional.ofNullable(description);
 	}
 
-	public String getDeprecationReason() {
-		return deprecationReason;
+	public Optional<String> getDeprecationReason() {
+		return Optional.ofNullable(deprecationReason);
 	}
 
 	public GraphOutput getReturn() {
@@ -80,12 +85,8 @@ public abstract class GraphField {
 		graphql.schema.GraphQLFieldDefinition.Builder builder = graphql.schema.GraphQLFieldDefinition.newFieldDefinition();
 
 		builder.name(name);
-		if (description != null) {
-			builder.description(description);
-		}
-		if (deprecationReason != null) {
-			builder.deprecate(deprecationReason);
-		}
+		getDescription().ifPresent(builder::description);
+		getDeprecationReason().ifPresent(builder::deprecate);
 		builder.type(definition.getGraphQLOutputType(registry));
 
 		for (GraphParameter parameter : parameters) {
@@ -98,7 +99,7 @@ public abstract class GraphField {
 
 	}
 
-	public abstract DataFetcher<?> getFetcher(RuntimeParameterFactory factory);
+	public abstract DataFetcher<?> getDataFetcher(RuntimeParameterFactory factory);
 
 	// object overrides
 
@@ -108,15 +109,15 @@ public abstract class GraphField {
 
 		builder.append("@").append(GraphQLField.class.getSimpleName()).append("(").append("name").append(" = ").append(name).append(")");
 		builder.append(" ");
-		builder.append(definition.getOutputType());
+		builder.append(definition.getDefinition());
 
 		return builder.toString();
 
 	}
 
-	// classes
+	// data
 
-	public static interface TypeAnnotation {
+	public static interface Data {
 
 		public String getName();
 

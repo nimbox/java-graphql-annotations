@@ -5,8 +5,8 @@ import java.util.List;
 import com.nimbox.graphql.annotations.GraphQLField;
 import com.nimbox.graphql.annotations.GraphQLType;
 
-@GraphQLType(name = "Human", description = "A humanoid creature in the Star Wars universe.", fieldOrder = { "id", "name", "homePlanet" })
-public class Human extends Character implements HasPlanet {
+@GraphQLType(name = "Human", description = "A humanoid creature in the Star Wars universe.", order = { "id", "name", "homePlanet" })
+public class Human extends Character implements HasPlanet, Everything {
 
 	private String homePlanet;
 

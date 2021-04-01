@@ -13,13 +13,13 @@ class RuntimeArgumentExtractorGet implements RuntimeArgumentExtractor {
 	public RuntimeArgumentExtractorGet() {
 	}
 
-	// mehods
+	// methods
 
 	@Override
 	public Object apply(Map<String, Object> arguments, RuntimeParameter parameter) throws Exception {
 
 		String name = parameter.name;
-		GraphInputTypeDefinition valueClass = parameter.type;
+		GraphInputTypeDefinition valueClass = ((RuntimeParameterArgument) parameter).getDefinition();
 
 		if (!arguments.containsKey(name)) {
 			if (valueClass.isList()) {

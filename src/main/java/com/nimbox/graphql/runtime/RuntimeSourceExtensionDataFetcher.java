@@ -18,9 +18,9 @@ public class RuntimeSourceExtensionDataFetcher<T> extends RuntimeDataFetcher<T> 
 
 	// constructors
 
-	public RuntimeSourceExtensionDataFetcher(final RuntimeParameterFactory factory, final Class<?> typeClass, final Method fieldMethod, final List<GraphParameter> parameters, Class<?> objectTypeClass) {
-		super(factory, fieldMethod, parameters);
-		this.constructor = getClassConstructorOrThrow(typeClass, objectTypeClass);
+	public RuntimeSourceExtensionDataFetcher(final RuntimeParameterFactory factory, final Class<?> container, final Method method, final List<GraphParameter> parameters, Class<?> referenceContainer) {
+		super(factory, method, parameters);
+		this.constructor = getClassConstructorOrThrow(container, referenceContainer);
 	}
 
 	// methods

@@ -1,24 +1,34 @@
 package com.nimbox.graphql.runtime;
 
-import com.nimbox.graphql.definitions.GraphInputTypeDefinition;
+import com.nimbox.graphql.definitions.GraphTypeDefinition;
 
 public class RuntimeParameter {
 
 	// properties
 
-	protected final GraphInputTypeDefinition type;
-	protected final String name;
+	final String name;
+	final GraphTypeDefinition definition;
 
 	// constructors
 
-	public RuntimeParameter(GraphInputTypeDefinition type) {
-		this.type = type;
+	public RuntimeParameter(GraphTypeDefinition type) {
 		this.name = null;
+		this.definition = type;
 	}
 
-	public RuntimeParameter(GraphInputTypeDefinition type, String name) {
-		this.type = type;
+	public RuntimeParameter(String name, GraphTypeDefinition type) {
+		this.definition = type;
 		this.name = name;
+	}
+
+	// getters
+
+	public String getName() {
+		return name;
+	}
+
+	public GraphTypeDefinition getDefinition() {
+		return definition;
 	}
 
 }

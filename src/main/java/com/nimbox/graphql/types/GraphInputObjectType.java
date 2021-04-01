@@ -3,7 +3,6 @@ package com.nimbox.graphql.types;
 import static graphql.schema.GraphqlTypeComparatorRegistry.AS_IS_REGISTRY;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -12,56 +11,50 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.nimbox.graphql.GraphBuilderException;
-import com.nimbox.graphql.annotations.GraphQLInput;
-import com.nimbox.graphql.annotations.GraphQLInputField;
 import com.nimbox.graphql.registries.GraphRegistry;
-import com.nimbox.graphql.utils.ReservedStrings;
 
 public class GraphInputObjectType {
 
 	// properties
 
-	private final Class<?> inputObjectTypeClass;
+	private final Class<?> container;
 
 	private final String name;
 	private final String description;
-	private final List<String> fieldOrder;
+	private final List<String> order;
 
 	private final Map<Method, GraphInputObjectTypeField> fields = new HashMap<Method, GraphInputObjectTypeField>();
 
 	// constructors
 
-	public GraphInputObjectType(GraphRegistry registry, final Class<?> inputObjectTypeClass) {
-
-		GraphQLInput annotation = inputObjectTypeClass.getAnnotation(GraphQLInput.class);
-		if (annotation == null) {
-			annotation = inputObjectTypeClass.getAnnotatedSuperclass().getAnnotation(GraphQLInput.class);
-		}
-		if (annotation == null) {
-			throw new GraphBuilderException(String.format("Expected annotation %s on class %s", GraphQLInput.class, inputObjectTypeClass));
-		}
+	public GraphInputObjectType(GraphRegistry registry, final Class<?> container, final Data data) {
 
 		// create
 
-		this.inputObjectTypeClass = inputObjectTypeClass;
+		this.container = container;
 
-		this.name = annotation.name();
-		this.description = ReservedStrings.translate(annotation.description());
-		this.fieldOrder = Arrays.asList(annotation.fieldOrder());
+		this.name = registry.name(data.getName(), container);
+		this.description = data.getDescription();
+		this.order = data.getOrder();
 
-		for (Method method : inputObjectTypeClass.getMethods()) {
-			if (method.isAnnotationPresent(GraphQLInputField.class)) {
-				fields.put(method, new GraphInputObjectTypeField(registry, method));
+		// fields
+
+		for (Method method : container.getMethods()) {
+			if (registry.getInputObjects().acceptTypeField(container, method)) {
+				fields.put(method, new GraphInputObjectTypeField(registry, container, method));
 			}
 		}
 
 	}
 
+	public GraphInputObjectType(GraphRegistry registry, final Class<?> container) {
+		this(registry, container, registry.getInputObjects().extractTypeData(container));
+	}
+
 	// getters
 
-	public Class<?> getInputObjectTypeClass() {
-		return inputObjectTypeClass;
+	public Class<?> getContainer() {
+		return container;
 	}
 
 	public String getName() {
@@ -72,8 +65,8 @@ public class GraphInputObjectType {
 		return Optional.of(description);
 	}
 
-	public List<String> getFieldOrder() {
-		return fieldOrder;
+	public List<String> getOrder() {
+		return order;
 	}
 
 	public Map<Method, GraphInputObjectTypeField> getFields() {
@@ -86,28 +79,35 @@ public class GraphInputObjectType {
 
 		graphql.schema.GraphQLInputObjectType.Builder builder = graphql.schema.GraphQLInputObjectType.newInputObject();
 
-		builder.name(name);
-		if (description != null) {
-			builder.description(description);
-		}
+		builder.name(getName());
+		getDescription().ifPresent(builder::description);
 
 		// sort by fieldsName and the rest alphabetically
 
 		Map<String, GraphInputObjectTypeField> fieldsByName = fields.values().stream().collect(Collectors.toMap(GraphInputObjectTypeField::getName, v -> v));
-		List<GraphInputObjectTypeField> fields = fieldOrder.stream().map(fieldsByName::remove).filter(Objects::nonNull).collect(Collectors.toList());
-		fields.addAll(fieldsByName.values().stream().sorted(Comparator.comparing(GraphInputObjectTypeField::getName)).collect(Collectors.toList()));
+		List<GraphInputObjectTypeField> sortedFields = order.stream().map(fieldsByName::remove).filter(Objects::nonNull).collect(Collectors.toList());
+		sortedFields.addAll(fieldsByName.values().stream().sorted(Comparator.comparing(GraphInputObjectTypeField::getName)).collect(Collectors.toList()));
 		builder.comparatorRegistry(AS_IS_REGISTRY);
 
 		// build each field
 
-		for (GraphInputObjectTypeField field : fields) {
-			
-			System.out.println(field);
-			
+		for (GraphInputObjectTypeField field : sortedFields) {
 			builder.field(field.newInputObjectField(registry));
 		}
 
 		return builder;
+
+	}
+
+	// data
+
+	public static interface Data {
+
+		String getName();
+
+		String getDescription();
+
+		List<String> getOrder();
 
 	}
 

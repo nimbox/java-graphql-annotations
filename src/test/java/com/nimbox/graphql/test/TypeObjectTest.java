@@ -7,9 +7,9 @@ import com.nimbox.graphql.GraphBuilder;
 import com.nimbox.graphql.annotations.GraphQLArgument;
 import com.nimbox.graphql.annotations.GraphQLField;
 import com.nimbox.graphql.annotations.GraphQLType;
+import com.nimbox.graphql.definitions.GraphOptionalDefinition;
 import com.nimbox.graphql.registries.GraphRegistry;
 import com.nimbox.graphql.test.domain.HumanOperations;
-import com.nimbox.graphql.types.GraphOptionalDefinition;
 import com.nimbox.graphql.utils.GraphUtils;
 import com.nimbox.util.Alternative;
 
@@ -24,7 +24,7 @@ class TypeObjectTest {
 
 	@BeforeEach
 	void beforeEach() {
-		registry = new GraphRegistry(ExecutionContext.class);
+		registry = new GraphRegistry();
 		registry.withOptional(new GraphOptionalDefinition<>(Alternative.class, Alternative::undefined, Alternative::ofNullable));
 	}
 
@@ -69,18 +69,6 @@ class TypeObjectTest {
 //		GraphQLObjectType ot = type.newObjectType(registry).build();
 //		System.out.println(ot);
 //		ot.getFieldDefinitions().stream().forEach(out::println);
-
-	}
-
-	//
-	//
-	//
-
-	public static class ExecutionContext {
-
-		public String getName() {
-			return "Some name";
-		}
 
 	}
 

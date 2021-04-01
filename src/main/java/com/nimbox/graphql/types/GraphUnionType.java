@@ -1,10 +1,7 @@
 package com.nimbox.graphql.types;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import com.nimbox.graphql.registries.GraphRegistry;
@@ -12,7 +9,7 @@ import com.nimbox.graphql.runtime.RuntimeTypeResolver;
 
 import graphql.schema.TypeResolver;
 
-public class GraphInterfaceType {
+public class GraphUnionType {
 
 	// properties
 
@@ -22,13 +19,10 @@ public class GraphInterfaceType {
 
 	private final String name;
 	private final String description;
-	private final List<String> order;
-
-	private final Map<Method, GraphInterfaceTypeField> fields = new HashMap<Method, GraphInterfaceTypeField>();
 
 	// constructors
 
-	public GraphInterfaceType(final GraphRegistry registry, final Class<?> container, Data data) {
+	public GraphUnionType(final GraphRegistry registry, final Class<?> container, final Data data) {
 
 		// create
 
@@ -36,20 +30,11 @@ public class GraphInterfaceType {
 
 		this.name = registry.name(data.getName(), container);
 		this.description = data.getDescription();
-		this.order = data.getOrder();
-
-		// fields
-
-		for (Method method : container.getMethods()) {
-			if (registry.getInterfaces().acceptTypeField(container, method)) {
-				fields.put(method, new GraphInterfaceTypeField(registry, container, method));
-			}
-		}
 
 	}
 
-	public GraphInterfaceType(final GraphRegistry registry, final Class<?> container) {
-		this(registry, container, registry.getInterfaces().extractTypeData(container));
+	public GraphUnionType(final GraphRegistry registry, final Class<?> container) {
+		this(registry, container, registry.getUnions().extractTypeData(container));
 	}
 
 	// getters
@@ -63,15 +48,7 @@ public class GraphInterfaceType {
 	}
 
 	public Optional<String> getDescription() {
-		return Optional.of(description);
-	}
-
-	public List<String> getOrder() {
-		return order;
-	}
-
-	public Map<Method, GraphInterfaceTypeField> getFields() {
-		return fields;
+		return Optional.ofNullable(description);
 	}
 
 	//
@@ -86,9 +63,9 @@ public class GraphInterfaceType {
 
 	// builder
 
-	public graphql.schema.GraphQLInterfaceType.Builder newInterfaceType(GraphRegistry registry) {
+	public graphql.schema.GraphQLUnionType.Builder newUnionType(GraphRegistry registry) {
 
-		graphql.schema.GraphQLInterfaceType.Builder builder = graphql.schema.GraphQLInterfaceType.newInterface();
+		graphql.schema.GraphQLUnionType.Builder builder = graphql.schema.GraphQLUnionType.newUnionType();
 
 		builder.name(getName());
 		getDescription().ifPresent(builder::description);
@@ -108,8 +85,6 @@ public class GraphInterfaceType {
 		String getName();
 
 		String getDescription();
-
-		List<String> getOrder();
 
 	}
 

@@ -1,6 +1,6 @@
 package com.nimbox.graphql.annotations;
 
-import static com.nimbox.graphql.utils.ReservedStrings.UNDEFINED;
+import static com.nimbox.graphql.utils.ReservedStringUtils.NULL;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -13,8 +13,8 @@ public @interface GraphQLArgument {
 
 	String name();
 
-	String description() default UNDEFINED;
+	String description() default NULL;
 
-	String defaultValue() default UNDEFINED;
+	String defaultValue() default NULL;
 
 }

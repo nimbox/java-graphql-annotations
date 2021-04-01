@@ -1,72 +1,89 @@
 package com.nimbox.graphql.registries;
 
+import static com.nimbox.graphql.utils.IntrospectionUtils.getAnnotationOrThrow;
+import static com.nimbox.graphql.utils.IntrospectionUtils.getSuperclassAnnotationOrThrow;
 import static graphql.schema.GraphQLTypeReference.typeRef;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.List;
 
-import com.nimbox.graphql.GraphBuilderException;
-import com.nimbox.graphql.registries.GraphRegistry.TypeAnnotation;
+import com.nimbox.graphql.annotations.GraphQLField;
+import com.nimbox.graphql.annotations.GraphQLType;
 import com.nimbox.graphql.types.GraphObjectType;
+import com.nimbox.graphql.types.GraphObjectTypeField;
+import com.nimbox.graphql.utils.ReservedStringUtils;
 
-import graphql.schema.GraphQLOutputType;
+import graphql.schema.GraphQLTypeReference;
 
-public class ObjectTypeRegistry {
-
-	// properties
-
-	private final GraphRegistry registry;
-	private Map<Class<?>, GraphObjectType> data = new HashMap<Class<?>, GraphObjectType>();
-	private Map<String, Class<?>> names = new HashMap<String, Class<?>>();
+public class ObjectTypeRegistry extends GraphTypeFieldRegistry<GraphObjectType, Class<?>, Method, GraphObjectType.Data, GraphObjectTypeField.Data> {
 
 	// constructors
 
 	public ObjectTypeRegistry(GraphRegistry registry) {
-		this.registry = registry;
+		super(registry);
+
+		withExtractors(new ClassExtractor<>( //
+				c -> !Modifier.isAbstract(c.getModifiers()) && c.isAnnotationPresent(GraphQLType.class), //
+				c -> new GraphObjectType.Data() {
+
+					GraphQLType annotation = getSuperclassAnnotationOrThrow(GraphQLType.class, c);
+
+					@Override
+					public String getName() {
+						return annotation.name();
+					}
+
+					@Override
+					public String getDescription() {
+						return ReservedStringUtils.translate(annotation.description());
+					}
+
+					@Override
+					public List<String> getOrder() {
+						return Arrays.asList(annotation.order());
+					}
+
+				} //
+		));
+
+		withFieldExtractors(new ClassFieldExtractor<>( //
+				(c, m) -> m.isAnnotationPresent(GraphQLField.class), //
+				(c, m) -> new GraphObjectTypeField.Data() {
+
+					GraphQLField annotation = getAnnotationOrThrow(GraphQLField.class, m);
+
+					@Override
+					public String getName() {
+						return annotation.name();
+					}
+
+					@Override
+					public String getDescription() {
+						return ReservedStringUtils.translate(annotation.description());
+					}
+
+					@Override
+					public String getDeprecationReason() {
+						return ReservedStringUtils.translate(annotation.deprecationReason());
+					}
+
+				} //
+		));
+
 	}
 
-	public GraphObjectType of(final Class<?> objectTypeClass) {
+	// methods
 
-		if (data.containsKey(objectTypeClass)) {
-			return data.get(objectTypeClass);
-		}
-
-		// check the name is not duplicated
-
-		TypeAnnotation<?>.Content annotation = registry.getTypeAnnotationOrThrow(objectTypeClass);
-		if (names.containsKey(annotation.getName())) {
-			throw new GraphBuilderException(String.format("Type %s has same name as type %s", objectTypeClass, names.get(annotation.getName())));
-		}
-
-		// create
-
-		GraphObjectType objectType = new GraphObjectType(registry, objectTypeClass);
-		data.put(objectTypeClass, objectType);
-		names.put(objectType.getName(), objectTypeClass);
-
-		// return
-
-		return objectType;
-
+	@Override
+	public GraphObjectType createType(Class<?> container) {
+		return new GraphObjectType(registry, container);
 	}
 
-	// getters
-
-	public boolean contains(Class<?> objectTypeClass) {
-		return data.containsKey(objectTypeClass);
-	}
-
-	public GraphObjectType get(Class<?> objectTypeClass) {
-		return data.get(objectTypeClass);
-	}
-
-	public GraphQLOutputType getGraphQLType(Class<?> objectTypeClass) {
-		return typeRef(data.get(objectTypeClass).getName());
-	}
-
-	public Collection<GraphObjectType> all() {
-		return data.values();
+	@Override
+	public GraphQLTypeReference getGraphQLType(Class<?> container) {
+		return typeRef(data.get(container).getName());
 	}
 
 }

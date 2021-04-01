@@ -1,65 +1,102 @@
 package com.nimbox.graphql.registries;
 
-import static com.nimbox.graphql.utils.IntrospectionUtils.getTypeAnnotationOrThrow;
+import static com.nimbox.graphql.utils.IntrospectionUtils.getAnnotationOrThrow;
+import static com.nimbox.graphql.utils.IntrospectionUtils.getSuperclassAnnotationOrThrow;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.nimbox.graphql.annotations.GraphQLField;
 import com.nimbox.graphql.annotations.GraphQLTypeExtension;
 import com.nimbox.graphql.types.GraphObjectTypeExtension;
+import com.nimbox.graphql.types.GraphObjectTypeField;
+import com.nimbox.graphql.utils.ReservedStringUtils;
 
-public class ObjectTypeExtensionRegistry {
+import graphql.schema.GraphQLTypeReference;
+
+public class ObjectTypeExtensionRegistry extends GraphTypeFieldRegistry<GraphObjectTypeExtension, Class<?>, Method, GraphObjectTypeExtension.Data, GraphObjectTypeField.Data> {
 
 	// properties
 
-	private final GraphRegistry registry;
-	private Map<Class<?>, GraphObjectTypeExtension> data = new HashMap<Class<?>, GraphObjectTypeExtension>();
-	private Map<Class<?>, List<GraphObjectTypeExtension>> dataByTypeClass = new HashMap<Class<?>, List<GraphObjectTypeExtension>>();
+	private Map<Class<?>, List<GraphObjectTypeExtension>> dataByReference = new HashMap<Class<?>, List<GraphObjectTypeExtension>>();
 
 	// constructors
 
 	public ObjectTypeExtensionRegistry(GraphRegistry registry) {
-		this.registry = registry;
+		super(registry);
+
+		withExtractors(new ClassExtractor<>( //
+				c -> !Modifier.isAbstract(c.getModifiers()) && c.isAnnotationPresent(GraphQLTypeExtension.class), //
+				c -> new GraphObjectTypeExtension.Data() {
+
+					GraphQLTypeExtension annotation = getSuperclassAnnotationOrThrow(GraphQLTypeExtension.class, c);
+
+					@Override
+					public Class<?> getType() {
+						return annotation.type();
+					}
+
+					@Override
+					public List<String> getOrder() {
+						return Arrays.asList(annotation.order());
+					}
+
+				} //
+		));
+
+		withFieldExtractors(new ClassFieldExtractor<>( //
+				(c, m) -> m.isAnnotationPresent(GraphQLField.class), //
+				(c, m) -> new GraphObjectTypeField.Data() {
+
+					GraphQLField annotation = getAnnotationOrThrow(GraphQLField.class, m);
+
+					@Override
+					public String getName() {
+						return annotation.name();
+					}
+
+					@Override
+					public String getDescription() {
+						return ReservedStringUtils.translate(annotation.description());
+					}
+
+					@Override
+					public String getDeprecationReason() {
+						return ReservedStringUtils.translate(annotation.deprecationReason());
+					}
+
+				} //
+		));
+
 	}
 
-	public GraphObjectTypeExtension of(final Class<?> objectTypeExtensionClass) {
+	// methods
 
-		if (data.containsKey(objectTypeExtensionClass)) {
-			return data.get(objectTypeExtensionClass);
-		}
+	@Override
+	public GraphObjectTypeExtension createType(Class<?> container) {
 
-		// check that it has the GraphQLType annotation.
+		GraphObjectTypeExtension type = new GraphObjectTypeExtension(registry, container);
+		dataByReference.computeIfAbsent(type.getReferenceContainer(), k -> new ArrayList<GraphObjectTypeExtension>()).add(type);
 
-		GraphQLTypeExtension annotation = getTypeAnnotationOrThrow(GraphQLTypeExtension.class, objectTypeExtensionClass);
-
-		// create
-
-		GraphObjectTypeExtension objectTypeExtension = new GraphObjectTypeExtension(registry, objectTypeExtensionClass);
-		data.put(objectTypeExtensionClass, objectTypeExtension);
-		dataByTypeClass.computeIfAbsent(objectTypeExtension.getObjectTypeClass(), k -> new ArrayList<GraphObjectTypeExtension>()).add(objectTypeExtension);
-
-		// return
-
-		return objectTypeExtension;
+		return type;
 
 	}
 
-	// getters
-
-	public GraphObjectTypeExtension get(Class<?> object) {
-		return data.get(object);
+	@Override
+	public GraphQLTypeReference getGraphQLType(Class<?> container) {
+		throw new UnsupportedOperationException();
 	}
 
-	public List<GraphObjectTypeExtension> getForObjectType(Class<?> object) {
-		return dataByTypeClass.getOrDefault(object, Collections.emptyList());
-	}
+	// methods on reference container
 
-	public Collection<GraphObjectTypeExtension> all() {
-		return data.values();
+	public List<GraphObjectTypeExtension> getForType(Class<?> referenceContainer) {
+		return dataByReference.getOrDefault(referenceContainer, Collections.emptyList());
 	}
 
 }

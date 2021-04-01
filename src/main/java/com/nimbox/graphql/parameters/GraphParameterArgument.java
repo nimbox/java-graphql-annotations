@@ -1,13 +1,14 @@
 package com.nimbox.graphql.parameters;
 
 import java.lang.reflect.Parameter;
+import java.util.Optional;
 
 import com.nimbox.graphql.annotations.GraphQLArgument;
 import com.nimbox.graphql.definitions.GraphInputTypeDefinition;
-import com.nimbox.graphql.inputs.GraphInput;
+import com.nimbox.graphql.nodes.GraphInput;
 import com.nimbox.graphql.registries.GraphRegistry;
-import com.nimbox.graphql.runtime.RuntimeParameter;
-import com.nimbox.graphql.utils.ReservedStrings;
+import com.nimbox.graphql.runtime.RuntimeParameterArgument;
+import com.nimbox.graphql.utils.ReservedStringUtils;
 
 public class GraphParameterArgument extends GraphParameter {
 
@@ -22,9 +23,10 @@ public class GraphParameterArgument extends GraphParameter {
 	GraphParameterArgument(final GraphRegistry registry, final Parameter parameter) {
 
 		GraphQLArgument annotation = parameter.getAnnotation(GraphQLArgument.class);
+		
 		this.name = annotation.name();
-		this.description = ReservedStrings.translate(annotation.description());
-		this.input = GraphInput.of(registry, GraphQLArgument.class, this.name, parameter);
+		this.description = ReservedStringUtils.translate(annotation.description());
+		this.input = GraphInput.of(registry, this.name, parameter);
 
 	}
 
@@ -34,8 +36,8 @@ public class GraphParameterArgument extends GraphParameter {
 		return name;
 	}
 
-	public String getDescription() {
-		return description;
+	public Optional<String> getDescription() {
+		return Optional.ofNullable(description);
 	}
 
 	@Override
@@ -44,8 +46,8 @@ public class GraphParameterArgument extends GraphParameter {
 	}
 
 	@Override
-	public RuntimeParameter getRuntimeParameter() {
-		return new RuntimeParameter(input.getDefinition(), name);
+	public RuntimeParameterArgument getRuntimeParameter() {
+		return new RuntimeParameterArgument(name, input.getDefinition());
 	}
 
 	// builder
@@ -54,10 +56,8 @@ public class GraphParameterArgument extends GraphParameter {
 
 		graphql.schema.GraphQLArgument.Builder builder = graphql.schema.GraphQLArgument.newArgument();
 
-		builder.name(name);
-		if (this.description != null) {
-			builder.description(description);
-		}
+		builder.name(getName());
+		getDescription().ifPresent(builder::description);
 		builder.type(input.getGraphQLInputType(registry));
 
 		return builder;

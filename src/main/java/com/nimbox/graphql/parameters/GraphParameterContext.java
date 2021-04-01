@@ -3,11 +3,11 @@ package com.nimbox.graphql.parameters;
 import java.lang.reflect.Parameter;
 
 import com.nimbox.graphql.annotations.GraphQLContext;
-import com.nimbox.graphql.contexts.GraphContext;
 import com.nimbox.graphql.definitions.GraphInputTypeDefinition;
+import com.nimbox.graphql.nodes.GraphContext;
 import com.nimbox.graphql.registries.GraphRegistry;
-import com.nimbox.graphql.runtime.RuntimeParameter;
-import com.nimbox.graphql.utils.ReservedStrings;
+import com.nimbox.graphql.runtime.RuntimeParameterContext;
+import com.nimbox.graphql.utils.ReservedStringUtils;
 
 public class GraphParameterContext extends GraphParameter {
 
@@ -21,7 +21,8 @@ public class GraphParameterContext extends GraphParameter {
 	GraphParameterContext(final GraphRegistry registry, final Parameter parameter) {
 
 		GraphQLContext annotation = parameter.getAnnotation(GraphQLContext.class);
-		this.name = ReservedStrings.translate(annotation.name());
+
+		this.name = ReservedStringUtils.translate(annotation.name());
 		this.context = GraphContext.of(registry, GraphQLContext.class, this.name, parameter);
 
 	}
@@ -38,9 +39,8 @@ public class GraphParameterContext extends GraphParameter {
 	}
 
 	@Override
-	public RuntimeParameter getRuntimeParameter() {
-//		return new RuntimeParameter(inputValue.getInputValue(), name);
-		return null;
+	public RuntimeParameterContext getRuntimeParameter() {
+		return new RuntimeParameterContext(name, context.getDefinition());
 	}
 
 	// object overrides

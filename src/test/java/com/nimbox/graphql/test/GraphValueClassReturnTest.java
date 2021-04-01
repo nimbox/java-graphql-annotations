@@ -18,9 +18,8 @@ import org.junit.jupiter.api.Test;
 import com.nimbox.graphql.GraphBuilderException;
 import com.nimbox.graphql.annotations.GraphQLId;
 import com.nimbox.graphql.definitions.GraphInputTypeDefinition;
+import com.nimbox.graphql.definitions.GraphOptionalDefinition;
 import com.nimbox.graphql.registries.GraphRegistry;
-import com.nimbox.graphql.test.TypeObjectTest.ExecutionContext;
-import com.nimbox.graphql.types.GraphOptionalDefinition;
 import com.nimbox.util.Alternative;
 
 class GraphValueClassReturnTest {
@@ -29,7 +28,7 @@ class GraphValueClassReturnTest {
 
 	@BeforeEach
 	void beforeEach() {
-		registry = new GraphRegistry(ExecutionContext.class);
+		registry = new GraphRegistry();
 		registry.withOptional(new GraphOptionalDefinition<>(Alternative.class, Alternative::undefined, Alternative::ofNullable));
 	}
 

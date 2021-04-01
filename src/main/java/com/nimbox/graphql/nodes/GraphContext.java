@@ -1,4 +1,4 @@
-package com.nimbox.graphql.contexts;
+package com.nimbox.graphql.nodes;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Parameter;

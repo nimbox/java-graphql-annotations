@@ -1,4 +1,4 @@
-package com.nimbox.graphql.outputs;
+package com.nimbox.graphql.nodes;
 
 import com.nimbox.graphql.definitions.GraphOutputTypeDefinition;
 import com.nimbox.graphql.registries.GraphRegistry;
@@ -16,8 +16,8 @@ public class GraphOutputUnion extends GraphOutput {
 	// getters
 
 	@Override
-	public GraphQLOutputType getGraphQLOutputType(GraphRegistry registry) {
-		return null;
+	public GraphQLOutputType getInternalGraphQLOutputType(final GraphRegistry registry) {
+		return registry.getUnions().getGraphQLType(definition.getType());
 	}
 
 }

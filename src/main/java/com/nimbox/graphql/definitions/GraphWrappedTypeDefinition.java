@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.nimbox.graphql.GraphBuilderException;
-import com.nimbox.graphql.annotations.GraphQLId;
 import com.nimbox.graphql.registries.GraphRegistry;
 
 public class GraphWrappedTypeDefinition extends GraphTypeDefinition {
@@ -99,6 +98,7 @@ public class GraphWrappedTypeDefinition extends GraphTypeDefinition {
 
 		Class<?> type;
 		boolean isId;
+		boolean isNotNull;
 
 		Class<?> optionalType = null;
 
@@ -107,7 +107,8 @@ public class GraphWrappedTypeDefinition extends GraphTypeDefinition {
 
 		Builder(final GraphRegistry registry, final AnnotatedElement element, final Type type) {
 
-			this.isId = element.isAnnotationPresent(GraphQLId.class);
+			this.isId = registry.isId(element);
+			this.isNotNull = registry.isNotNull(element);
 
 			if (type instanceof ParameterizedType) {
 				checkOptionalOrList(registry, type);

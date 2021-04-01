@@ -1,5 +1,6 @@
 package com.nimbox.graphql.parameters;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
 import com.nimbox.graphql.GraphBuilderException;
@@ -16,17 +17,20 @@ public abstract class GraphParameter {
 	GraphParameter() {
 	}
 
-	public static GraphParameter of(final GraphRegistry registry, final Parameter parameter) {
+	public static GraphParameter of(final GraphRegistry registry, final Method method, final Parameter parameter) {
 
 		if (parameter.isAnnotationPresent(GraphQLArgument.class)) {
 			return new GraphParameterArgument(registry, parameter);
 		}
 
 		if (parameter.isAnnotationPresent(GraphQLContext.class)) {
-			return GraphParameterContext.of(registry, parameter);
+			return new GraphParameterContext(registry, parameter);
 		}
 
-		throw new GraphBuilderException(String.format("Parameter %s does not have a recognized annotation", parameter.getName()));
+		throw new GraphBuilderException(String.format( //
+				"Parameter %s of type %s in method %s does not have a recognized annotation", //
+				parameter.getName(), parameter.getType(), method //
+		));
 
 	}
 

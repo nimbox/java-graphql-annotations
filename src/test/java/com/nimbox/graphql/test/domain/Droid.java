@@ -6,7 +6,7 @@ import com.nimbox.graphql.annotations.GraphQLField;
 import com.nimbox.graphql.annotations.GraphQLType;
 
 @GraphQLType(name = "Droid", description = "A character in the Star Wars Trilogy.")
-public class Droid extends Character {
+public class Droid extends Character implements Everything {
 
 	private String primaryFunction;
 

@@ -49,8 +49,8 @@ public class RuntimeParameterFactory {
 	@SuppressWarnings("unchecked")
 	public <T> T get(DataFetchingEnvironment environment, RuntimeParameter parameter) throws Exception {
 
-		if (extractors.containsKey(parameter.type.getType())) {
-			return (T) extractors.get(parameter.type.getType()).get(parameter.name).get(environment);
+		if (extractors.containsKey(parameter.definition.getType())) {
+			return (T) extractors.get(parameter.definition.getType()).get(parameter.name).get(environment);
 		}
 
 		return (T) arguments.get(environment.getArguments(), parameter);

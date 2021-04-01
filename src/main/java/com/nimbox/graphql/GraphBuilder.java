@@ -3,7 +3,8 @@ package com.nimbox.graphql;
 import static graphql.schema.GraphQLTypeReference.typeRef;
 import static graphql.schema.GraphqlTypeComparatorRegistry.AS_IS_REGISTRY;
 
-import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -11,27 +12,33 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import com.nimbox.graphql.definitions.GraphOptionalDefinition;
+import com.nimbox.graphql.registries.ClassExtractor;
+import com.nimbox.graphql.registries.ClassFieldExtractor;
 import com.nimbox.graphql.registries.GraphRegistry;
-import com.nimbox.graphql.registries.GraphRegistry.FieldAnnotation;
-import com.nimbox.graphql.registries.GraphRegistry.TypeAnnotation;
 import com.nimbox.graphql.runtime.RuntimeParameterFactory;
 import com.nimbox.graphql.types.GraphEnumType;
 import com.nimbox.graphql.types.GraphEnumTypeValue;
 import com.nimbox.graphql.types.GraphInputObjectType;
 import com.nimbox.graphql.types.GraphInterfaceType;
+import com.nimbox.graphql.types.GraphInterfaceTypeField;
 import com.nimbox.graphql.types.GraphMutationField;
 import com.nimbox.graphql.types.GraphObjectType;
 import com.nimbox.graphql.types.GraphObjectTypeExtension;
 import com.nimbox.graphql.types.GraphObjectTypeExtensionField;
 import com.nimbox.graphql.types.GraphObjectTypeField;
-import com.nimbox.graphql.types.GraphOptionalDefinition;
 import com.nimbox.graphql.types.GraphQueryField;
 import com.nimbox.graphql.types.GraphScalarType;
+import com.nimbox.graphql.types.GraphUnionType;
 
+import graphql.schema.Coercing;
 import graphql.schema.DataFetcher;
 import graphql.schema.GraphQLCodeRegistry;
 import graphql.schema.GraphQLEnumType;
@@ -39,49 +46,179 @@ import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLInterfaceType;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
+import graphql.schema.GraphQLUnionType;
 
 public class GraphBuilder {
 
-//	private static final Logger _logger = LoggerFactory.getLogger(GraphSchemaBuilder.class);
-
+	//
 	// properties
+	//
 
-	private List<GeneratorPackage> packages = new ArrayList<GeneratorPackage>();
-	private List<GraphOptionalDefinition<?>> optionals = new ArrayList<GraphOptionalDefinition<?>>();
+	private Map<Class<?>, Map<String, DataFetcher<?>>> contexts = new HashMap<>();
 
-	private final List<TypeAnnotation<?>> typeAnnotations = new ArrayList<TypeAnnotation<?>>();
-	private final List<FieldAnnotation<?>> fieldAnnotations = new ArrayList<FieldAnnotation<?>>();
+	private final List<Predicate<AnnotatedElement>> idPredicates = new ArrayList<>();
+	private final List<Predicate<AnnotatedElement>> notNullPredicates = new ArrayList<>();
+	private List<GraphOptionalDefinition<?>> optionals = new ArrayList<>();
 
-	private Map<Class<?>, Class<?>> scalars = new HashMap<Class<?>, Class<?>>();
-	private List<Class<?>> enums = new ArrayList<Class<?>>();
+	private final List<ClassExtractor<Class<?>, GraphInterfaceType.Data>> interfaceExtractors = new ArrayList<>();
+	private final List<ClassFieldExtractor<Class<?>, Method, GraphInterfaceTypeField.Data>> interfaceFieldExtractors = new ArrayList<>();
 
-	private List<Class<?>> objects = new ArrayList<Class<?>>();
-	private List<Class<?>> objectExtensions = new ArrayList<Class<?>>();
+	private final List<ClassExtractor<Class<?>, GraphUnionType.Data>> unionExtractors = new ArrayList<>();
 
-	private List<Class<?>> operations = new ArrayList<Class<?>>();
+	private final List<ClassExtractor<Class<?>, GraphObjectType.Data>> objectExtractors = new ArrayList<>();
+	private final List<ClassFieldExtractor<Class<?>, Method, GraphObjectTypeField.Data>> objectFieldExtractors = new ArrayList<>();
 
-	private Map<Class<?>, Map<String, DataFetcher<?>>> contexts = new HashMap<Class<?>, Map<String, DataFetcher<?>>>();
+	//
 
+	private List<Class<? extends Coercing<?, ?>>> scalars = new ArrayList<>();
+	private List<Class<?>> enums = new ArrayList<>();
+	private List<Class<?>> inputObjects = new ArrayList<>();
+
+	private List<Class<?>> objects = new ArrayList<>();
+	private List<Class<?>> objectExtensions = new ArrayList<>();
+
+	private List<Class<?>> operations = new ArrayList<>();
+
+	//
 	// constructors
+	//
 
 	public GraphBuilder() {
 	}
 
-	// configurations
+	//
+	// configurators
+	//
 
-	public GraphBuilder withPackages(ClassLoader classLoader, String... packages) {
-		this.packages.add(new GeneratorPackage(classLoader, packages));
+	// context
+
+	public final <T> GraphBuilder withContext(Class<T> context, DataFetcher<T> fetcher) {
+		return withContext(context, null, fetcher);
+	}
+
+	public final <T> GraphBuilder withContext(Class<T> context, String name, DataFetcher<T> fetcher) {
+		contexts.computeIfAbsent(context, k -> new HashMap<String, DataFetcher<?>>()).put(name, fetcher);
 		return this;
 	}
 
-	public <U> GraphBuilder withOptional(Class<U> klass, Supplier<U> undefined, Function<Object, U> nullable) {
+	// predicates
+
+	@SafeVarargs
+	public final GraphBuilder withId(Predicate<AnnotatedElement>... predicates) {
+		return withId(Arrays.asList(predicates));
+	}
+
+	public final GraphBuilder withId(List<Predicate<AnnotatedElement>> predicates) {
+		this.idPredicates.addAll(predicates);
+		return this;
+	}
+
+	@SafeVarargs
+	public final GraphBuilder withNotNull(Predicate<AnnotatedElement>... predicates) {
+		return withNotNull(Arrays.asList(predicates));
+	}
+
+	public final GraphBuilder withNotNull(List<Predicate<AnnotatedElement>> predicates) {
+		this.notNullPredicates.addAll(predicates);
+		return this;
+	}
+
+	// optionals
+
+	public final <U> GraphBuilder withOptional(Class<U> klass, Supplier<U> undefined, Function<Object, U> nullable) {
 		this.optionals.add(new GraphOptionalDefinition<>(klass, undefined, nullable));
 		return this;
 	}
 
-	public GraphBuilder withOperations(Class<?>... operations) {
-		this.operations.addAll(Arrays.asList(operations));
+	// scalars
+
+	@SafeVarargs
+	public final GraphBuilder withScalars(Class<? extends Coercing<?, ?>>... scalars) {
+		return withScalars(Arrays.asList(scalars));
+	}
+
+	public final GraphBuilder withScalars(List<Class<? extends Coercing<?, ?>>> scalars) {
+		this.scalars.addAll(scalars);
 		return this;
+	}
+
+	// enums
+
+	public final GraphBuilder withEnums(Class<?>... enums) {
+		return withEnums(Arrays.asList(enums));
+	}
+
+	public final GraphBuilder withEnums(List<Class<?>> enums) {
+		this.enums.addAll(enums);
+		return this;
+	}
+
+	// input objects
+
+	public final GraphBuilder withInputObjects(Class<?>... inputObjects) {
+		return withInputObjects(Arrays.asList(inputObjects));
+	}
+
+	public final GraphBuilder withInputObjects(List<Class<?>> inputObjects) {
+		this.inputObjects.addAll(inputObjects);
+		return this;
+	}
+
+	// interfaces
+
+	public GraphBuilder withInterfaceExtractor(Predicate<Class<?>> is, Function<Class<?>, GraphInterfaceType.Data> extractor) {
+		interfaceExtractors.add(new ClassExtractor<>(is, extractor));
+		return this;
+	}
+
+	public GraphBuilder withInterfaceFieldExtractor(BiPredicate<Class<?>, Method> accept, BiFunction<Class<?>, Method, GraphInterfaceTypeField.Data> extract) {
+		interfaceFieldExtractors.add(new ClassFieldExtractor<>(accept, extract));
+		return this;
+	}
+
+	// unions
+
+	public GraphBuilder withUnionExtractor(Predicate<Class<?>> is, Function<Class<?>, GraphUnionType.Data> extractor) {
+		unionExtractors.add(new ClassExtractor<>(is, extractor));
+		return this;
+	}
+
+	// objects
+
+	public GraphBuilder withObjectExtractor(Predicate<Class<?>> is, Function<Class<?>, GraphObjectType.Data> extractor) {
+		objectExtractors.add(new ClassExtractor<>(is, extractor));
+		return this;
+	}
+
+	public GraphBuilder withObjectFieldExtractor(BiPredicate<Class<?>, Method> accept, BiFunction<Class<?>, Method, GraphObjectTypeField.Data> extract) {
+		objectFieldExtractors.add(new ClassFieldExtractor<>(accept, extract));
+		return this;
+	}
+
+	public GraphBuilder withObjects(Class<?>... objects) {
+		return withObjects(Arrays.asList(objects));
+	}
+
+	public GraphBuilder withObjects(List<Class<?>> objects) {
+		this.objects.addAll(objects);
+		return this;
+	}
+
+	// object extensions
+
+	public GraphBuilder withObjectExtensions(Class<?>... objectExtensions) {
+		return withObjectExtensions(Arrays.asList(objectExtensions));
+	}
+
+	public GraphBuilder withObjectExtensions(List<Class<?>> objectExtensions) {
+		this.objectExtensions.addAll(objectExtensions);
+		return this;
+	}
+
+	// operations
+
+	public final GraphBuilder withOperations(Class<?>... operations) {
+		return withOperations(Arrays.asList(operations));
 	}
 
 	public GraphBuilder withOperations(List<Class<?>> operations) {
@@ -89,59 +226,11 @@ public class GraphBuilder {
 		return this;
 	}
 
-	public GraphBuilder withScalar(Class<?> javaClass, Class<?> scalarTypeClass) {
-		this.scalars.put(javaClass, scalarTypeClass);
-		return this;
-	}
-
-	public GraphBuilder withEnums(Class<?>... enums) {
-		this.enums.addAll(Arrays.asList(enums));
-		return this;
-	}
-
-	public <T> GraphBuilder withContext(Class<T> context, DataFetcher<T> fetcher) {
-		return withContext(context, null, fetcher);
-	}
-
-	public <T> GraphBuilder withContext(Class<T> context, String name, DataFetcher<T> fetcher) {
-		contexts.computeIfAbsent(context, k -> new HashMap<String, DataFetcher<?>>()).put(name, fetcher);
-		return this;
-	}
-
+	//
+	// build
 	//
 
-	public <T extends Annotation> GraphBuilder withObjectAnnotation(Class<T> annotationClass, Function<T, String> getName, Function<T, String> getDescription, Function<T, String[]> getFieldOrder) {
-		typeAnnotations.add(new TypeAnnotation<T>(annotationClass, getName, getDescription, getFieldOrder));
-		return this;
-	}
-
-	public GraphBuilder withObjects(Class<?>... types) {
-		this.objects.addAll(Arrays.asList(types));
-		return this;
-	}
-
-	public GraphBuilder withObjects(List<Class<?>> types) {
-		this.objects.addAll(types);
-		return this;
-	}
-
-	//
-
-	public <T extends Annotation> GraphBuilder withObjectFieldAnnotation(Class<T> annotationClass, Function<T, String> getName, Function<T, String> getDescription, Function<T, String> getDeprecationReason) {
-		fieldAnnotations.add(new FieldAnnotation<T>(annotationClass, getName, getDescription, getDeprecationReason));
-		return this;
-	}
-
-	//
-
-	public GraphBuilder withTypeExtensions(Class<?>... typeExtensions) {
-		this.objectExtensions.addAll(Arrays.asList(typeExtensions));
-		return this;
-	}
-
-	// generation
-
-//	@SuppressWarnings("unchecked")
+	@SuppressWarnings("unchecked")
 	public GraphQLSchema build() {
 
 		// populate the registry
@@ -150,21 +239,28 @@ public class GraphBuilder {
 
 		// extended annotations
 
-		registry.withTypeAnnotations(typeAnnotations);
-		registry.withFieldAnnotations(fieldAnnotations);
+		registry.getInterfaces().withExtractors(interfaceExtractors);
+		registry.getInterfaces().withFieldExtractors(interfaceFieldExtractors);
+
+		registry.getObjects().withExtractors(objectExtractors);
+		registry.getObjects().withFieldExtractors(objectFieldExtractors);
 
 		//
 
+		contexts.forEach((c, m) -> m.forEach((n, f) -> registry.withContext((Class<Object>) c, n, (DataFetcher<Object>) f)));
+
+		idPredicates.forEach(registry::withId);
+		notNullPredicates.forEach(registry::withNotNull);
 		optionals.forEach(registry::withOptional);
 
-		scalars.entrySet().stream().forEach(e -> registry.getScalars().of(e.getKey(), e.getValue()));
-		enums.stream().forEach(registry.getEnums()::of);
+		scalars.stream().forEach(registry.getScalars()::compute);
+		enums.stream().forEach(registry.getEnums()::compute);
 
 		operations.stream().forEach(registry.getQueries()::of);
 		operations.stream().forEach(registry.getMutations()::of);
 
-		objects.stream().forEach(registry.getObjects()::of);
-		objectExtensions.stream().forEach(registry.getObjectExtensions()::of);
+		objects.stream().forEach(registry.getObjects()::compute);
+		objectExtensions.stream().forEach(registry.getObjectExtensions()::compute);
 
 		// the registry is full at this point
 
@@ -188,6 +284,7 @@ public class GraphBuilder {
 		// objects
 
 		buildInterfaceTypes(registry, factory, builder, codeBuilder);
+		buildUnionTypes(registry, factory, builder, codeBuilder);
 		buildObjectTypes(registry, factory, builder, codeBuilder);
 
 		// operations
@@ -254,7 +351,7 @@ public class GraphBuilder {
 			for (GraphQueryField query : queries) {
 				GraphQLFieldDefinition fieldDefinition = query.newFieldDefinition(registry).build();
 				objectTypeBuilder.field(fieldDefinition);
-				fetchers.add(new FieldFetcher(fieldDefinition, query.getFetcher(factory)));
+				fetchers.add(new FieldFetcher(fieldDefinition, query.getDataFetcher(factory)));
 			}
 
 			GraphQLObjectType objectTypeDefinition = objectTypeBuilder.build();
@@ -281,7 +378,7 @@ public class GraphBuilder {
 			for (GraphMutationField mutation : mutations) {
 				GraphQLFieldDefinition fieldDefinition = mutation.newFieldDefinition(registry).build();
 				objectTypeBuilder.field(fieldDefinition);
-				fetchers.add(new FieldFetcher(fieldDefinition, mutation.getFetcher(factory)));
+				fetchers.add(new FieldFetcher(fieldDefinition, mutation.getDataFetcher(factory)));
 			}
 
 			GraphQLObjectType objectTypeDefinition = objectTypeBuilder.build();
@@ -303,14 +400,14 @@ public class GraphBuilder {
 
 			// sort
 
-			Map<String, GraphObjectTypeField> fieldsByName = interfaceType.getFields().values().stream().collect(Collectors.toMap(GraphObjectTypeField::getName, Function.identity()));
-			List<GraphObjectTypeField> fields = interfaceType.getFieldOrder().stream().map(fieldsByName::remove).filter(Objects::nonNull).collect(Collectors.toList());
-			fields.addAll(fieldsByName.values().stream().sorted(Comparator.comparing(GraphObjectTypeField::getName)).collect(Collectors.toList()));
+			Map<String, GraphInterfaceTypeField> fieldsByName = interfaceType.getFields().values().stream().collect(Collectors.toMap(GraphInterfaceTypeField::getName, Function.identity()));
+			List<GraphInterfaceTypeField> fields = interfaceType.getOrder().stream().map(fieldsByName::remove).filter(Objects::nonNull).collect(Collectors.toList());
+			fields.addAll(fieldsByName.values().stream().sorted(Comparator.comparing(GraphInterfaceTypeField::getName)).collect(Collectors.toList()));
 			interfaceTypeBuilder.comparatorRegistry(AS_IS_REGISTRY);
 
 			// build
 
-			for (GraphObjectTypeField field : fields) {
+			for (GraphInterfaceTypeField field : fields) {
 				GraphQLFieldDefinition fieldDefinition = field.newFieldDefinition(registry).build();
 				interfaceTypeBuilder.field(fieldDefinition);
 			}
@@ -318,8 +415,30 @@ public class GraphBuilder {
 			// register
 
 			GraphQLInterfaceType interfaceTypeDefinition = interfaceTypeBuilder.build();
-			codeBuilder.typeResolver(interfaceTypeDefinition, interfaceType.getResolver());
+			codeBuilder.typeResolver(interfaceTypeDefinition, interfaceType.getTypeResolver());
 			builder.additionalType(interfaceTypeDefinition);
+
+		}
+
+	}
+
+	private void buildUnionTypes(GraphRegistry registry, RuntimeParameterFactory factory, GraphQLSchema.Builder builder, GraphQLCodeRegistry.Builder codeBuilder) {
+
+		for (GraphUnionType unionType : registry.getUnions().all()) {
+
+			GraphQLUnionType.Builder unionTypeBuilder = unionType.newUnionType(registry);
+
+			// build
+
+			for (GraphObjectType objectType : unionType.getImplementations()) {
+				unionTypeBuilder.possibleType(registry.getObjects().getGraphQLType(objectType.getContainer()));
+			}
+
+			// register
+
+			GraphQLUnionType unionTypeDefinition = unionTypeBuilder.build();
+			codeBuilder.typeResolver(unionTypeDefinition, unionType.getTypeResolver());
+			builder.additionalType(unionTypeDefinition);
 
 		}
 
@@ -335,14 +454,13 @@ public class GraphBuilder {
 			// sort
 
 			Map<String, GraphObjectTypeField> fieldsByName = objectType.getFields().values().stream().collect(Collectors.toMap(GraphObjectTypeField::getName, Function.identity()));
-			List<GraphObjectTypeField> fields = objectType.getFieldOrder().stream().map(fieldsByName::remove).filter(Objects::nonNull).collect(Collectors.toList());
+			List<GraphObjectTypeField> fields = objectType.getOrder().stream().map(fieldsByName::remove).filter(Objects::nonNull).collect(Collectors.toList());
 			fields.addAll(fieldsByName.values().stream().sorted(Comparator.comparing(GraphObjectTypeField::getName)).collect(Collectors.toList()));
 			objectTypeBuilder.comparatorRegistry(AS_IS_REGISTRY);
 
 			// interfaces
 
 			for (GraphInterfaceType interfaceType : objectType.getInterfaces()) {
-				System.out.println("INTER: " + interfaceType.getName());
 				objectTypeBuilder.withInterface(typeRef(interfaceType.getName()));
 			}
 
@@ -351,16 +469,16 @@ public class GraphBuilder {
 			for (GraphObjectTypeField field : fields) {
 				GraphQLFieldDefinition fieldDefinition = field.newFieldDefinition(registry).build();
 				objectTypeBuilder.field(fieldDefinition);
-				fetchers.add(new FieldFetcher(fieldDefinition, field.getFetcher(factory)));
+				fetchers.add(new FieldFetcher(fieldDefinition, field.getDataFetcher(factory)));
 			}
 
 			// extend
 
-			for (GraphObjectTypeExtension extension : registry.getObjectExtensions().getForObjectType(objectType.getObjectTypeClass())) {
+			for (GraphObjectTypeExtension extension : registry.getObjectExtensions().getForType(objectType.getContainer())) {
 				for (GraphObjectTypeExtensionField field : extension.getFields().values()) {
 					GraphQLFieldDefinition fieldDefinition = field.newFieldDefinition(registry).build();
 					objectTypeBuilder.field(fieldDefinition);
-					fetchers.add(new FieldFetcher(fieldDefinition, field.getFetcher(factory)));
+					fetchers.add(new FieldFetcher(fieldDefinition, field.getDataFetcher(factory)));
 				}
 			}
 
@@ -382,26 +500,6 @@ public class GraphBuilder {
 	//
 	// classes
 	//
-
-	public static class GeneratorPackage {
-
-		private final ClassLoader classLoader;
-		private final String[] packages;
-
-		public GeneratorPackage(ClassLoader classLoader, String... packages) {
-			this.classLoader = classLoader;
-			this.packages = packages;
-		}
-
-		public ClassLoader getClassLoader() {
-			return classLoader;
-		}
-
-		public String[] getPackages() {
-			return packages;
-		}
-
-	}
 
 	private static class FieldFetcher {
 

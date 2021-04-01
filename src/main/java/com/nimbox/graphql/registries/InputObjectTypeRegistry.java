@@ -1,81 +1,89 @@
 package com.nimbox.graphql.registries;
 
+import static com.nimbox.graphql.utils.IntrospectionUtils.getAnnotationOrThrow;
+import static com.nimbox.graphql.utils.IntrospectionUtils.getSuperclassAnnotationOrThrow;
 import static graphql.schema.GraphQLTypeReference.typeRef;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
 
-import com.nimbox.graphql.GraphBuilderException;
 import com.nimbox.graphql.annotations.GraphQLInput;
+import com.nimbox.graphql.annotations.GraphQLInputField;
 import com.nimbox.graphql.types.GraphInputObjectType;
+import com.nimbox.graphql.types.GraphInputObjectTypeField;
+import com.nimbox.graphql.utils.ReservedStringUtils;
 
 import graphql.schema.GraphQLTypeReference;
 
-public class InputObjectTypeRegistry {
-
-	// properties
-
-	private final GraphRegistry registry;
-	private final Map<Class<?>, GraphInputObjectType> data = new HashMap<Class<?>, GraphInputObjectType>();
-	private Map<String, Class<?>> names = new HashMap<String, Class<?>>();
+public class InputObjectTypeRegistry extends GraphTypeFieldRegistry<GraphInputObjectType, Class<?>, Method, GraphInputObjectType.Data, GraphInputObjectTypeField.Data> {
 
 	// constructors
 
 	public InputObjectTypeRegistry(GraphRegistry registry) {
-		this.registry = registry;
+		super(registry);
+
+		withExtractors(new ClassExtractor<>( //
+				c -> c.isAnnotationPresent(GraphQLInput.class), //
+				c -> new GraphInputObjectType.Data() {
+
+					GraphQLInput annotation = getSuperclassAnnotationOrThrow(GraphQLInput.class, c);
+
+					@Override
+					public String getName() {
+						return annotation.name();
+					}
+
+					@Override
+					public String getDescription() {
+						return ReservedStringUtils.translate(annotation.description());
+					}
+
+					@Override
+					public List<String> getOrder() {
+						return Arrays.asList(annotation.order());
+					}
+
+				} //
+
+		));
+
+		withFieldExtractors(new ClassFieldExtractor<>( //
+				(c, m) -> m.isAnnotationPresent(GraphQLInputField.class), //
+				(c, m) -> new GraphInputObjectTypeField.Data() {
+
+					GraphQLInputField annotation = getAnnotationOrThrow(GraphQLInputField.class, m);
+
+					@Override
+					public String getName() {
+						return annotation.name();
+					}
+
+					@Override
+					public String getDescription() {
+						return ReservedStringUtils.translate(annotation.description());
+					}
+
+					@Override
+					public Object getDefaultValue() {
+						return null;
+					}
+
+				} //
+		));
+
 	}
 
-	public GraphInputObjectType of(Class<?> typeClass) {
+	// methods
 
-		if (data.containsKey(typeClass)) {
-			return data.get(typeClass);
-		}
-
-		// check that it has the GraphQLInput annotation.
-
-		GraphQLInput annotation = typeClass.getAnnotation(GraphQLInput.class);
-		if (annotation == null) {
-			annotation = typeClass.getAnnotatedSuperclass().getAnnotation(GraphQLInput.class);
-		}
-		if (annotation == null) {
-			throw new GraphBuilderException(String.format("Type %s does not have annotation %s", typeClass, GraphQLInput.class));
-		}
-
-		// check the name is not duplicated
-
-		if (names.containsKey(annotation.name())) {
-			throw new GraphBuilderException(String.format("Type %s has same name as type %s", typeClass, names.get(annotation.name())));
-		}
-
-		// create
-
-		GraphInputObjectType inputObject = new GraphInputObjectType(registry, typeClass);
-		data.put(typeClass, inputObject);
-		names.put(inputObject.getName(), typeClass);
-
-		// return
-
-		return inputObject;
-
+	@Override
+	public GraphInputObjectType createType(Class<?> container) {
+		return new GraphInputObjectType(registry, container);
 	}
 
-	// getters
-
-	public boolean contains(Class<?> inputObjectTypeClass) {
-		return data.containsKey(inputObjectTypeClass);
-	}
-
-	public GraphInputObjectType get(Class<?> object) {
-		return data.get(object);
-	}
-
-	public GraphQLTypeReference getGraphQLType(Class<?> inputObjectTypeClass) {
-		return typeRef(data.get(inputObjectTypeClass).getName());
-	}
-
-	public Collection<GraphInputObjectType> all() {
-		return data.values();
+	@Override
+	public GraphQLTypeReference getGraphQLType(Class<?> container) {
+		return typeRef(data.get(container).getName());
 	}
 
 }

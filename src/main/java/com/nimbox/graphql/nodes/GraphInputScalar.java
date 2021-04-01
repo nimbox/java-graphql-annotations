@@ -1,4 +1,4 @@
-package com.nimbox.graphql.inputs;
+package com.nimbox.graphql.nodes;
 
 import static graphql.Scalars.GraphQLID;
 
@@ -11,19 +11,19 @@ public class GraphInputScalar extends GraphInput {
 
 	// constructors
 
-	GraphInputScalar(GraphInputTypeDefinition inputValue) {
+	GraphInputScalar(final GraphInputTypeDefinition inputValue) {
 		super(inputValue);
 	}
 
 	// getters
 
 	@Override
-	GraphQLInputType getInternalGraphQLInputType(GraphRegistry registry) {
+	GraphQLInputType getInternalGraphQLInputType(final GraphRegistry registry) {
 
 		if (definition.isId()) {
 			return GraphQLID;
 		} else {
-			return registry.getScalars().getGraphQLType(definition.getType());
+			return registry.getScalars().getGraphQLTypeType(definition.getType());
 		}
 
 	}

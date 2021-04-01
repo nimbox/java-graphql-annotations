@@ -11,6 +11,6 @@ public @interface GraphQLTypeExtension {
 
 	Class<?> type();
 
-	String[] fieldOrder() default {};
+	String[] order() default {};
 
 }

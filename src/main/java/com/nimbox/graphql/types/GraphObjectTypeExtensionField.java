@@ -12,20 +12,20 @@ public class GraphObjectTypeExtensionField extends GraphObjectTypeField {
 
 	// properties
 
-	private Class<?> sourceObjectTypeClass;
+	private Class<?> referenceContainer;
 
 	// constructor
 
-	public GraphObjectTypeExtensionField(final GraphRegistry registry, final Class<?> typeClass, final Method fieldMethod, Class<?> sourceObjectTypeClass) {
-		super(registry, typeClass, fieldMethod);
-		this.sourceObjectTypeClass = sourceObjectTypeClass;
+	public GraphObjectTypeExtensionField(final GraphRegistry registry, final Class<?> container, final Method method, final Class<?> referenceContainer) {
+		super(registry, container, method);
+		this.referenceContainer = referenceContainer;
 	}
 
 	// methods
 
 	@Override
-	public DataFetcher<?> getFetcher(RuntimeParameterFactory factory) {
-		return new RuntimeSourceExtensionDataFetcher<>(factory, container, method, parameters, sourceObjectTypeClass);
+	public DataFetcher<?> getDataFetcher(RuntimeParameterFactory factory) {
+		return new RuntimeSourceExtensionDataFetcher<>(factory, container, method, parameters, referenceContainer);
 	}
 
 }

@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 
 import com.nimbox.graphql.annotations.GraphQLScalar;
 
-@GraphQLScalar(name = "LocalDateTime", description = "A local date and time")
+@GraphQLScalar(type = LocalDateTime.class, name = "LocalDateTime", description = "A local date and time")
 public class LocalDateTimeScalar extends StringBasedScalar<LocalDateTime> {
 
 	public LocalDateTimeScalar() {

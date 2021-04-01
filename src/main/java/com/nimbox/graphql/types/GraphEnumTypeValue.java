@@ -1,42 +1,40 @@
 package com.nimbox.graphql.types;
 
-import static com.nimbox.graphql.utils.IntrospectionUtils.getAnnotationOrThrow;
-import static com.nimbox.graphql.utils.IntrospectionUtils.getEnumValueFromField;
-
 import java.lang.reflect.Field;
+import java.util.Optional;
 
-import com.nimbox.graphql.annotations.GraphQLEnumValue;
 import com.nimbox.graphql.registries.GraphRegistry;
-import com.nimbox.graphql.utils.ReservedStrings;
 
 public class GraphEnumTypeValue {
 
 	// properties
 
-	protected final Class<?> enumTypeClass;
-	protected final Field enumField;
-	protected final Object enumValue;
+	protected final Class<?> container;
+	protected final Field field;
 
 	protected final String name;
 	protected final String description;
 	protected final String deprecationReason;
+	protected final Object value;
 
 	// constructors
 
-	public GraphEnumTypeValue(final GraphRegistry registry, final Class<?> enumTypeClass, Field enumField) {
-
-		GraphQLEnumValue annotation = getAnnotationOrThrow(GraphQLEnumValue.class, enumField);
+	public GraphEnumTypeValue(final GraphRegistry registry, final Class<?> container, final Field field, final Data data) {
 
 		// create
 
-		this.enumTypeClass = enumTypeClass;
-		this.enumField = enumField;
-		this.enumValue = getEnumValueFromField(enumTypeClass, enumField);
+		this.container = container;
+		this.field = field;
 
-		this.name = annotation.name();
-		this.description = ReservedStrings.translate(annotation.description());
-		this.deprecationReason = ReservedStrings.translate(annotation.deprecationReason());
+		this.name = data.getName();
+		this.description = data.getDescription();
+		this.deprecationReason = data.getDeprecationReason();
+		this.value = data.getValue();
 
+	}
+
+	public GraphEnumTypeValue(final GraphRegistry registry, final Class<?> container, final Field field) {
+		this(registry, container, field, registry.getEnums().extractTypeFieldData(container, field));
 	}
 
 	// getters
@@ -45,12 +43,16 @@ public class GraphEnumTypeValue {
 		return name;
 	}
 
-	public String getDescription() {
-		return description;
+	public Optional<String> getDescription() {
+		return Optional.ofNullable(description);
 	}
 
-	public String getDeprecationReason() {
-		return deprecationReason;
+	public Optional<String> getDeprecationReason() {
+		return Optional.ofNullable(deprecationReason);
+	}
+
+	public Object getValue() {
+		return value;
 	}
 
 	// builder
@@ -59,16 +61,26 @@ public class GraphEnumTypeValue {
 
 		graphql.schema.GraphQLEnumValueDefinition.Builder builder = graphql.schema.GraphQLEnumValueDefinition.newEnumValueDefinition();
 
-		builder.name(name);
-		if (description != null) {
-			builder.description(description);
-		}
-		if (deprecationReason != null) {
-			builder.deprecationReason(deprecationReason);
-		}
-		builder.value(enumValue);
+		builder.name(getName());
+		getDescription().ifPresent(builder::description);
+		getDeprecationReason().ifPresent(builder::deprecationReason);
+		builder.value(value);
 
 		return builder;
+
+	}
+
+	// data
+
+	public static interface Data {
+
+		public String getName();
+
+		public String getDescription();
+
+		public String getDeprecationReason();
+
+		public Object getValue();
 
 	}
 

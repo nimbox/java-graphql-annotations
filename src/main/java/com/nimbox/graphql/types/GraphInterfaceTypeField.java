@@ -9,18 +9,18 @@ import com.nimbox.graphql.runtime.RuntimeSourceDataFetcher;
 
 import graphql.schema.DataFetcher;
 
-public class GraphObjectTypeField extends GraphField {
+public class GraphInterfaceTypeField extends GraphField {
 
 	// constructor
 
-	public GraphObjectTypeField(final GraphRegistry registry, final Class<?> container, final Method method) {
-		super(registry, container, method, registry.getObjects().extractTypeFieldData(container, method));
+	public GraphInterfaceTypeField(final GraphRegistry registry, Class<?> container, final Method method) {
+		super(registry, container, method, registry.getInterfaces().extractTypeFieldData(container, method));
 	}
 
 	// methods
 
 	@Override
-	public DataFetcher<?> getDataFetcher(final RuntimeParameterFactory factory) {
+	public DataFetcher<?> getDataFetcher(RuntimeParameterFactory factory) {
 		return new RuntimeSourceDataFetcher<>(factory, container, method, parameters);
 	}
 

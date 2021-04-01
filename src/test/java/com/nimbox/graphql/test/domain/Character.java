@@ -7,7 +7,7 @@ import com.nimbox.graphql.annotations.GraphQLId;
 import com.nimbox.graphql.annotations.GraphQLInterface;
 
 @GraphQLInterface(name = "Character", description = "A character in the Star Wars Trilogy.")
-public class Character {
+public class Character implements Everything {
 
 	private String id;
 	private String name;

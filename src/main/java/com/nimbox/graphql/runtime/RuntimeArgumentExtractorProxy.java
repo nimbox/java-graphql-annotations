@@ -18,8 +18,8 @@ public class RuntimeArgumentExtractorProxy implements RuntimeArgumentExtractor {
 
 	private final RuntimeArgumentFactory factory;
 
-	private final Class<?> typeClass;
-	private final Map<Method, RuntimeParameter> fields = new LinkedHashMap<Method, RuntimeParameter>();
+	private final Class<?> container;
+	private final Map<Method, RuntimeParameterArgument> methods = new LinkedHashMap<Method, RuntimeParameterArgument>();
 
 	// constructors
 
@@ -27,56 +27,56 @@ public class RuntimeArgumentExtractorProxy implements RuntimeArgumentExtractor {
 
 		this.factory = factory;
 
-		this.typeClass = inputObjectType.getInputObjectTypeClass();
+		this.container = inputObjectType.getContainer();
 		for (Map.Entry<Method, GraphInputObjectTypeField> e : inputObjectType.getFields().entrySet()) {
-			fields.put(e.getKey(), new RuntimeParameter(e.getValue().getReturnInput().getDefinition(), e.getValue().getName()));
+			methods.put(e.getKey(), new RuntimeParameterArgument(e.getValue().getName(), e.getValue().getReturnInput().getDefinition()));
 		}
 
 	}
 
-	// mehods
+	// methods
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public Object apply(Map<String, Object> arguments, RuntimeParameter parameter) throws Exception {
 
 		String name = parameter.name;
-		GraphInputTypeDefinition valueClass = parameter.type;
+		GraphInputTypeDefinition definition = ((RuntimeParameterArgument) parameter).getDefinition();
 
 		if (!arguments.containsKey(name)) {
-			if (valueClass.isList()) {
-				return valueClass.undefinedList();
+			if (definition.isList()) {
+				return definition.undefinedList();
 			} else {
-				return valueClass.undefined();
+				return definition.undefined();
 			}
 		}
 
 		Object value = arguments.get(name);
 
-		if (valueClass.isList()) {
+		if (definition.isList()) {
 			List<Object> list = new ArrayList<Object>(((List<?>) value).size());
-			if (valueClass.isOptionalList()) {
-				if (valueClass.isOptional()) {
+			if (definition.isOptionalList()) {
+				if (definition.isOptional()) {
 					for (Object a : (List<?>) value) {
-						list.add(valueClass.nullable(proxy(typeClass, factory, fields, (Map<String, Object>) a)));
+						list.add(definition.nullable(proxy(container, factory, methods, (Map<String, Object>) a)));
 					}
 				} else {
 					for (Object a : (List<?>) value) {
-						list.add(proxy(typeClass, factory, fields, (Map<String, Object>) a));
+						list.add(proxy(container, factory, methods, (Map<String, Object>) a));
 					}
 				}
-				return valueClass.nullableList(value);
+				return definition.nullableList(value);
 			} else {
 				for (Object a : (List<?>) value) {
-					list.add(proxy(typeClass, factory, fields, (Map<String, Object>) a));
+					list.add(proxy(container, factory, methods, (Map<String, Object>) a));
 				}
 				return list;
 			}
 		} else {
-			if (valueClass.isOptional()) {
-				return valueClass.nullable(proxy(typeClass, factory, fields, (Map<String, Object>) value));
+			if (definition.isOptional()) {
+				return definition.nullable(proxy(container, factory, methods, (Map<String, Object>) value));
 			} else {
-				return proxy(typeClass, factory, fields, (Map<String, Object>) value);
+				return proxy(container, factory, methods, (Map<String, Object>) value);
 			}
 		}
 

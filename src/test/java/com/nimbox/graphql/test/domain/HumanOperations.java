@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.nimbox.graphql.annotations.GraphQLArgument;
-import com.nimbox.graphql.annotations.GraphQLEnvironment;
+import com.nimbox.graphql.annotations.GraphQLContext;
 import com.nimbox.graphql.annotations.GraphQLId;
 import com.nimbox.graphql.annotations.GraphQLInput;
 import com.nimbox.graphql.annotations.GraphQLInputField;
@@ -20,6 +20,12 @@ public class HumanOperations {
 
 	public Alternative<Human> getHuman1(@GraphQLArgument(name = "id") @GraphQLId String id) {
 		return null;
+	}
+
+	public Object asd() {
+
+		return (Object) new Character();
+
 	}
 
 	@GraphQLQuery(name = "getCharacter")
@@ -62,7 +68,7 @@ public class HumanOperations {
 	}
 
 	@GraphQLQuery(name = "getHumansByEpisode")
-	public List<Human> getHumansByEpisode(@GraphQLArgument(name = "episode") Episode episode, @GraphQLArgument(name = "age") Optional<Integer> age, @GraphQLEnvironment DataFetchingEnvironment environment) {
+	public List<Human> getHumansByEpisode(@GraphQLArgument(name = "episode") Episode episode, @GraphQLArgument(name = "age") Optional<Integer> age, @GraphQLContext DataFetchingEnvironment environment) {
 
 		System.out.println("in get humans");
 		System.out.println(episode);
@@ -88,7 +94,7 @@ public class HumanOperations {
 
 	// inputs
 
-	@GraphQLInput(name = "HumanInput", fieldOrder = { "name", "address" })
+	@GraphQLInput(name = "HumanInput", order = { "name", "address" })
 	public static interface HumanInput {
 
 		@GraphQLInputField(name = "name")
@@ -102,7 +108,7 @@ public class HumanOperations {
 
 	}
 
-	@GraphQLInput(name = "HumanInput", fieldOrder = { "name", "address" })
+	@GraphQLInput(name = "HumanInput", order = { "name", "address" })
 	public static interface HumanNestedInput {
 
 		@GraphQLInputField(name = "name1")

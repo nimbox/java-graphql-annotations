@@ -1,97 +1,114 @@
 package com.nimbox.graphql.registries;
 
-import static com.nimbox.graphql.utils.IntrospectionUtils.getTypeAnnotationOrThrow;
+import static com.nimbox.graphql.utils.IntrospectionUtils.getSuperclassAnnotationOrThrow;
 import static graphql.Scalars.GraphQLBoolean;
 import static graphql.Scalars.GraphQLFloat;
 import static graphql.Scalars.GraphQLInt;
 import static graphql.Scalars.GraphQLString;
+import static graphql.schema.GraphQLTypeReference.typeRef;
 
 import java.math.BigDecimal;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.nimbox.graphql.GraphBuilderException;
 import com.nimbox.graphql.annotations.GraphQLScalar;
 import com.nimbox.graphql.types.GraphScalarType;
+import com.nimbox.graphql.utils.ReservedStringUtils;
 
+import graphql.schema.Coercing;
 import graphql.schema.GraphQLScalarType;
+import graphql.schema.GraphQLTypeReference;
 
-public class ScalarTypeRegistry {
+/**
+ * Maintains list of scalars by their coercing classes. To get the
+ * {@code GraphQLScalarType} the parameter to {@code getGraphQLType} is the
+ * output of the coercing class.
+ *
+ */
+public class ScalarTypeRegistry extends GraphTypeRegistry<GraphScalarType, Class<? extends Coercing<?, ?>>, GraphScalarType.Data> {
 
 	// properties
 
-	private final GraphRegistry registry;
-
 	private Map<Class<?>, GraphQLScalarType> defaults = new HashMap<Class<?>, GraphQLScalarType>();
-
-	private Map<Class<?>, GraphScalarType> data = new HashMap<Class<?>, GraphScalarType>();
-	private Map<String, Class<?>> names = new HashMap<String, Class<?>>();
+	private Map<Class<?>, GraphScalarType> dataByReference = new HashMap<Class<?>, GraphScalarType>();
 
 	// constructors
 
 	public ScalarTypeRegistry(GraphRegistry registry) {
-		this.registry = registry;
+		super(registry);
 
 		defaults.put(Integer.class, GraphQLInt);
 		defaults.put(Long.class, GraphQLInt);
 
 		defaults.put(Double.class, GraphQLFloat);
+		defaults.put(Float.class, GraphQLFloat);
 		defaults.put(BigDecimal.class, GraphQLFloat);
 
 		defaults.put(String.class, GraphQLString);
 		defaults.put(Boolean.class, GraphQLBoolean);
 
-	}
+		registry.name(GraphQLInt.getName(), Integer.class);
+		registry.name(GraphQLFloat.getName(), Double.class);
+		registry.name(GraphQLString.getName(), String.class);
+		registry.name(GraphQLBoolean.getName(), Boolean.class);
 
-	public GraphScalarType of(final Class<?> javaClass, final Class<?> scalarCoercingClass) {
+		withExtractors(new ClassExtractor<>( //
+				c -> c.isAnnotationPresent(GraphQLScalar.class), //
+				c -> new GraphScalarType.Data() {
 
-		if (data.containsKey(javaClass)) {
-			return data.get(javaClass);
-		}
+					GraphQLScalar annotation = getSuperclassAnnotationOrThrow(GraphQLScalar.class, c);
 
-		// check the name is not duplicated
+					@Override
+					public Class<?> getType() {
+						return annotation.type();
+					}
 
-		GraphQLScalar annotation = getTypeAnnotationOrThrow(GraphQLScalar.class, scalarCoercingClass);
-		if (names.containsKey(annotation.name())) {
-			throw new GraphBuilderException(String.format("Type %s has same name as type %s", javaClass, names.get(annotation.name())));
-		}
+					@Override
+					public String getName() {
+						return annotation.name();
+					}
 
-		// create
+					@Override
+					public String getDescription() {
+						return ReservedStringUtils.translate(annotation.description());
+					}
 
-		GraphScalarType scalarType = new GraphScalarType(registry, javaClass, scalarCoercingClass);
-		data.put(javaClass, scalarType);
-		names.put(scalarType.getName(), javaClass);
-
-		// return
-
-		return scalarType;
-
-	}
-
-	// getters
-
-	public boolean contains(Class<?> scalarTypeClass) {
-		return defaults.containsKey(scalarTypeClass) || data.containsKey(scalarTypeClass);
-	}
-
-	public GraphQLScalarType getGraphQLType(Class<?> valueClass) {
-
-		if (defaults.containsKey(valueClass)) {
-			return defaults.get(valueClass);
-		}
-
-		if (data.containsKey(valueClass)) {
-			GraphScalarType scalarType = data.get(valueClass);
-			return scalarType.built();
-		}
-
-		return null;
+				} //
+		));
 
 	}
 
-	public Collection<GraphScalarType> all() {
-		return data.values();
+	// methods
+
+	@Override
+	public GraphScalarType createType(Class<? extends Coercing<?, ?>> container) {
+
+		GraphScalarType type = new GraphScalarType(registry, container);
+		dataByReference.put(type.getReferenceContainer(), type);
+
+		return type;
+
+	}
+
+	@Override
+	public GraphQLTypeReference getGraphQLType(Class<? extends Coercing<?, ?>> container) {
+		return typeRef(data.get(container).getName());
+	}
+
+	// methods on reference container
+
+	public boolean containsType(Class<?> referenceContainer) {
+		return defaults.containsKey(referenceContainer) || dataByReference.containsKey(referenceContainer);
+	}
+
+	public GraphQLScalarType getGraphQLTypeType(Class<?> referenceContainer) {
+
+		if (defaults.containsKey(referenceContainer)) {
+			return defaults.get(referenceContainer);
+		}
+
+		return dataByReference.get(referenceContainer).built();
+
 	}
 
 }

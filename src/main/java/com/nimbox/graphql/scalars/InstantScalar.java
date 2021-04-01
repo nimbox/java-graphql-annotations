@@ -6,7 +6,7 @@ import java.time.Instant;
 
 import com.nimbox.graphql.annotations.GraphQLScalar;
 
-@GraphQLScalar(name = "Instant", description = "An instant in time")
+@GraphQLScalar(type = Instant.class, name = "Instant", description = "An instant in time")
 public class InstantScalar extends StringBasedScalar<Instant> {
 
 	public InstantScalar() {

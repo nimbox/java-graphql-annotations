@@ -1,56 +1,70 @@
 package com.nimbox.graphql.types;
 
 import java.lang.reflect.Method;
+import java.util.Optional;
 
-import com.nimbox.graphql.GraphBuilderException;
 import com.nimbox.graphql.annotations.GraphQLInputField;
-import com.nimbox.graphql.inputs.GraphInput;
+import com.nimbox.graphql.nodes.GraphInput;
 import com.nimbox.graphql.registries.GraphRegistry;
-import com.nimbox.graphql.utils.ReservedStrings;
 
 public class GraphInputObjectTypeField {
 
 	// properties
 
+	final Class<?> container;
+	final Method method;
+
 	private final String name;
 	private final String description;
 	private final Object defaultValue;
 
-	private final GraphInput returnInput;
+	private final GraphInput definition;
 
 	// constructor
 
-	public GraphInputObjectTypeField(final GraphRegistry registry, final Method method) {
+	public GraphInputObjectTypeField(final GraphRegistry registry, final Class<?> container, final Method method, final Data data) {
 
-		GraphQLInputField annotation = method.getAnnotation(GraphQLInputField.class);
-		if (annotation == null) {
-			throw new GraphBuilderException(String.format("Expected annotation %s on method %s", GraphQLInputField.class, method));
-		}
+		// create
 
-		this.name = annotation.name();
-		this.description = ReservedStrings.translate(annotation.description());
-		this.defaultValue = null;
+		this.container = container;
+		this.method = method;
 
-		this.returnInput = GraphInput.of(registry, GraphQLInputField.class, this.name, method);
+		this.name = data.getName();
+		this.description = data.getDescription();
+		this.defaultValue = data.getDefaultValue();
+
+		this.definition = GraphInput.of(registry, this.name, method);
 
 	}
 
+	public GraphInputObjectTypeField(final GraphRegistry registry, final Class<?> container, final Method method) {
+		this(registry, container, method, registry.getInputObjects().extractTypeFieldData(container, method));
+	}
+
 	// getters
+
+	public Class<?> getContainer() {
+		return container;
+	}
+
+	public Method getMethod() {
+		return method;
+	}
 
 	public String getName() {
 		return name;
 	}
 
-	public String getDescription() {
-		return description;
+	public Optional<String> getDescription() {
+		return Optional.ofNullable(description);
 	}
 
-	public Object getDefaultValue() {
-		return defaultValue;
+	public Optional<Object> getDefaultValue() {
+		return Optional.ofNullable(defaultValue);
 	}
 
 	public GraphInput getReturnInput() {
-		return returnInput;
+		return definition;
 	}
 
 	// builder
@@ -59,15 +73,10 @@ public class GraphInputObjectTypeField {
 
 		graphql.schema.GraphQLInputObjectField.Builder builder = graphql.schema.GraphQLInputObjectField.newInputObjectField();
 
-		builder.name(name);
-		if (description != null) {
-			builder.description(description);
-		}
-		if (defaultValue != null) {
-			builder.defaultValue(defaultValue);
-		}
-
-		builder.type(returnInput.getGraphQLInputType(registry));
+		builder.name(getName());
+		getDescription().ifPresent(builder::description);
+		getDefaultValue().ifPresent(builder::defaultValue);
+		builder.type(definition.getGraphQLInputType(registry));
 
 		return builder;
 
@@ -79,11 +88,23 @@ public class GraphInputObjectTypeField {
 
 		StringBuilder builder = new StringBuilder();
 
-		builder.append("@GraphQLInputField").append("(").append("name").append(" = ").append(name).append(")");
+		builder.append("@").append(GraphQLInputField.class.getSimpleName()).append("(").append("name").append(" = ").append(name).append(")");
 		builder.append(" ");
-		builder.append(returnInput.getDefinition());
+		builder.append(definition.getDefinition());
 
 		return builder.toString();
+
+	}
+
+	// data
+
+	public static interface Data {
+
+		public String getName();
+
+		public String getDescription();
+
+		public Object getDefaultValue();
 
 	}
 

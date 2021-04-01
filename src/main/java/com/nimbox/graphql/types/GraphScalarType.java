@@ -1,11 +1,9 @@
 package com.nimbox.graphql.types;
 
-import static com.nimbox.graphql.utils.IntrospectionUtils.getTypeAnnotationOrThrow;
+import java.util.Optional;
 
 import com.nimbox.graphql.GraphBuilderException;
-import com.nimbox.graphql.annotations.GraphQLScalar;
 import com.nimbox.graphql.registries.GraphRegistry;
-import com.nimbox.graphql.utils.ReservedStrings;
 
 import graphql.schema.Coercing;
 import graphql.schema.GraphQLScalarType;
@@ -14,8 +12,8 @@ public class GraphScalarType {
 
 	// properties
 
-	private final Class<?> javaClass;
-	private final Class<Coercing<?, ?>> scalarCoercingClass;
+	private final Class<? extends Coercing<?, ?>> container;
+	private final Class<?> referenceContainer;
 
 	private final String name;
 	private final String description;
@@ -24,37 +22,42 @@ public class GraphScalarType {
 
 	// constructors
 
-	public GraphScalarType(final GraphRegistry registry, final Class<?> javaClass, final Class<?> scalarCoercingClass) {
-
-		GraphQLScalar annotation = getTypeAnnotationOrThrow(GraphQLScalar.class, scalarCoercingClass);
+	public GraphScalarType(final GraphRegistry registry, final Class<? extends Coercing<?, ?>> container, Data data) {
 
 		// create
 
-		this.javaClass = javaClass;
-		this.scalarCoercingClass = (Class<Coercing<?, ?>>) scalarCoercingClass;
+		this.container = container;
+		this.referenceContainer = data.getType();
 
-		this.name = annotation.name();
-		this.description = ReservedStrings.translate(annotation.description());
+		this.name = registry.name(data.getName(), container);
+		this.description = data.getDescription();
+
+		// build
 
 		this.built = newScalarType(registry).build();
 
 	}
-	// getters
 
-	public Class<?> getJavaClass() {
-		return javaClass;
+	public GraphScalarType(final GraphRegistry registry, final Class<? extends Coercing<?, ?>> container) {
+		this(registry, container, registry.getScalars().extractTypeData(container));
 	}
 
-	public Class<Coercing<?, ?>> getScalarCoercingClass() {
-		return scalarCoercingClass;
+	// getters
+
+	public Class<? extends Coercing<?, ?>> getContainer() {
+		return container;
+	}
+
+	public Class<?> getReferenceContainer() {
+		return referenceContainer;
 	}
 
 	public String getName() {
 		return name;
 	}
 
-	public String getDescription() {
-		return description;
+	public Optional<String> getDescription() {
+		return Optional.of(description);
 	}
 
 	public GraphQLScalarType built() {
@@ -69,18 +72,27 @@ public class GraphScalarType {
 
 			graphql.schema.GraphQLScalarType.Builder builder = graphql.schema.GraphQLScalarType.newScalar();
 
-			builder.name(name);
-			if (description != null) {
-				builder.description(description);
-			}
-
-			builder.coercing(scalarCoercingClass.getDeclaredConstructor().newInstance());
+			builder.name(getName());
+			getDescription().ifPresent(builder::description);
+			builder.coercing(container.getDeclaredConstructor().newInstance());
 
 			return builder;
 
 		} catch (Exception e) {
-			throw new GraphBuilderException(String.format("Unable to create scalar definition for %s", scalarCoercingClass));
+			throw new GraphBuilderException(String.format("Unable to create scalar definition for %s", container));
 		}
+
+	}
+
+	// data
+
+	public static interface Data {
+
+		Class<?> getType();
+
+		String getName();
+
+		String getDescription();
 
 	}
 

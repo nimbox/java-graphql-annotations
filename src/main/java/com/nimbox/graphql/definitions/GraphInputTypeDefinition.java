@@ -4,7 +4,6 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Type;
 
 import com.nimbox.graphql.registries.GraphRegistry;
-import com.nimbox.graphql.types.GraphOptionalDefinition;
 
 /**
  * Represents a GraphQL value class that can be of the form

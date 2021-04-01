@@ -1,74 +1,89 @@
 package com.nimbox.graphql.registries;
 
-import static com.nimbox.graphql.utils.IntrospectionUtils.getTypeAnnotationOrThrow;
+import static com.nimbox.graphql.utils.IntrospectionUtils.getAnnotationOrThrow;
+import static com.nimbox.graphql.utils.IntrospectionUtils.getSuperclassAnnotationOrThrow;
 import static graphql.schema.GraphQLTypeReference.typeRef;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
 
-import com.nimbox.graphql.GraphBuilderException;
+import com.nimbox.graphql.annotations.GraphQLField;
 import com.nimbox.graphql.annotations.GraphQLInterface;
 import com.nimbox.graphql.types.GraphInterfaceType;
+import com.nimbox.graphql.types.GraphInterfaceTypeField;
+import com.nimbox.graphql.types.GraphObjectTypeField;
+import com.nimbox.graphql.utils.ReservedStringUtils;
 
-import graphql.schema.GraphQLOutputType;
+import graphql.schema.GraphQLTypeReference;
 
-public class InterfaceTypeRegistry {
-
-	// properties
-
-	private final GraphRegistry registry;
-	private Map<Class<?>, GraphInterfaceType> data = new HashMap<Class<?>, GraphInterfaceType>();
-
-	private Map<String, Class<?>> names = new HashMap<String, Class<?>>();
+public class InterfaceTypeRegistry extends GraphTypeFieldRegistry<GraphInterfaceType, Class<?>, Method, GraphInterfaceType.Data, GraphInterfaceTypeField.Data> {
 
 	// constructors
 
 	public InterfaceTypeRegistry(GraphRegistry registry) {
-		this.registry = registry;
+		super(registry);
+
+		withExtractors(new ClassExtractor<>( //
+				c -> c.isAnnotationPresent(GraphQLInterface.class), //
+				c -> new GraphInterfaceType.Data() {
+
+					GraphQLInterface annotation = getSuperclassAnnotationOrThrow(GraphQLInterface.class, c);
+
+					@Override
+					public String getName() {
+						return annotation.name();
+					}
+
+					@Override
+					public String getDescription() {
+						return ReservedStringUtils.translate(annotation.description());
+					}
+
+					@Override
+					public List<String> getOrder() {
+						return Arrays.asList(annotation.order());
+					}
+
+				} //
+		));
+
+		withFieldExtractors(new ClassFieldExtractor<>( //
+				(c, m) -> m.isAnnotationPresent(GraphQLField.class), //
+				(c, m) -> new GraphObjectTypeField.Data() {
+
+					GraphQLField annotation = getAnnotationOrThrow(GraphQLField.class, m);
+
+					@Override
+					public String getName() {
+						return annotation.name();
+					}
+
+					@Override
+					public String getDescription() {
+						return ReservedStringUtils.translate(annotation.description());
+					}
+
+					@Override
+					public String getDeprecationReason() {
+						return ReservedStringUtils.translate(annotation.deprecationReason());
+					}
+
+				} //
+		));
+
 	}
 
-	public GraphInterfaceType of(final Class<?> interfaceTypeClass) {
+	// methods
 
-		if (data.containsKey(interfaceTypeClass)) {
-			return data.get(interfaceTypeClass);
-		}
-
-		// check the name is not duplicated
-
-		GraphQLInterface annotation = getTypeAnnotationOrThrow(GraphQLInterface.class, interfaceTypeClass);
-		if (names.containsKey(annotation.name())) {
-			throw new GraphBuilderException(String.format("Interface %s has same name as interface %s", interfaceTypeClass, names.get(annotation.name())));
-		}
-
-		// create
-
-		GraphInterfaceType interfaceType = new GraphInterfaceType(registry, interfaceTypeClass);
-		data.put(interfaceTypeClass, interfaceType);
-		names.put(interfaceType.getName(), interfaceTypeClass);
-
-		// return
-
-		return interfaceType;
-
+	@Override
+	public GraphInterfaceType createType(Class<?> container) {
+		return new GraphInterfaceType(registry, container);
 	}
 
-	// getters
-
-	public boolean contains(Class<?> interfaceTypeClass) {
-		return data.containsKey(interfaceTypeClass);
-	}
-
-	public GraphInterfaceType get(Class<?> interfaceTypeClass) {
-		return data.get(interfaceTypeClass);
-	}
-
-	public GraphQLOutputType getGraphQLType(Class<?> interfaceTypeClass) {
-		return typeRef(data.get(interfaceTypeClass).getName());
-	}
-
-	public Collection<GraphInterfaceType> all() {
-		return data.values();
+	@Override
+	public GraphQLTypeReference getGraphQLType(Class<?> container) {
+		return typeRef(data.get(container).getName());
 	}
 
 }

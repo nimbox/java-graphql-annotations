@@ -24,24 +24,24 @@ public class RuntimeArgumentFactory {
 	}
 
 	public RuntimeArgumentFactory with(GraphScalarType scalarType) {
-		extractors.computeIfAbsent(scalarType.getJavaClass(), k -> new RuntimeArgumentExtractorGet());
+		extractors.computeIfAbsent(scalarType.getReferenceContainer(), k -> new RuntimeArgumentExtractorGet());
 		return this;
 	}
 
 	public RuntimeArgumentFactory with(GraphEnumType enumType) {
-		extractors.computeIfAbsent(enumType.getEnumTypeClass(), k -> new RuntimeArgumentExtractorGet());
+		extractors.computeIfAbsent(enumType.getContainer(), k -> new RuntimeArgumentExtractorGet());
 		return this;
 	}
 
 	public RuntimeArgumentFactory with(GraphInputObjectType inputObjectType) {
-		extractors.computeIfAbsent(inputObjectType.getInputObjectTypeClass(), k -> new RuntimeArgumentExtractorProxy(this, inputObjectType));
+		extractors.computeIfAbsent(inputObjectType.getContainer(), k -> new RuntimeArgumentExtractorProxy(this, inputObjectType));
 		return this;
 	}
 
 	// getters
 
 	public Object get(Map<String, Object> arguments, RuntimeParameter parameter) throws Exception {
-		return extractors.get(parameter.type.getType()).apply(arguments, parameter);
+		return extractors.get(parameter.definition.getType()).apply(arguments, parameter);
 	}
 
 	// object overrides

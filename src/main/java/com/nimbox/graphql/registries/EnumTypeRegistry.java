@@ -1,74 +1,94 @@
 package com.nimbox.graphql.registries;
 
-import static com.nimbox.graphql.utils.IntrospectionUtils.getTypeAnnotationOrThrow;
+import static com.nimbox.graphql.utils.IntrospectionUtils.getAnnotationOrThrow;
+import static com.nimbox.graphql.utils.IntrospectionUtils.getEnumValueFromField;
+import static com.nimbox.graphql.utils.IntrospectionUtils.getSuperclassAnnotationOrThrow;
 import static graphql.schema.GraphQLTypeReference.typeRef;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.List;
 
-import com.nimbox.graphql.GraphBuilderException;
 import com.nimbox.graphql.annotations.GraphQLEnum;
+import com.nimbox.graphql.annotations.GraphQLEnumValue;
 import com.nimbox.graphql.types.GraphEnumType;
+import com.nimbox.graphql.types.GraphEnumTypeValue;
+import com.nimbox.graphql.utils.ReservedStringUtils;
 
 import graphql.schema.GraphQLTypeReference;
 
-public class EnumTypeRegistry {
-
-	// properties
-
-	private final GraphRegistry registry;
-
-	private Map<Class<?>, GraphEnumType> data = new HashMap<Class<?>, GraphEnumType>();
-	private Map<String, Class<?>> names = new HashMap<String, Class<?>>();
+public class EnumTypeRegistry extends GraphTypeFieldRegistry<GraphEnumType, Class<?>, Field, GraphEnumType.Data, GraphEnumTypeValue.Data> {
 
 	// constructors
 
 	public EnumTypeRegistry(GraphRegistry registry) {
-		this.registry = registry;
+		super(registry);
+
+		withExtractors(new ClassExtractor<>( //
+				c -> c.isAnnotationPresent(GraphQLEnum.class), //
+				c -> new GraphEnumType.Data() {
+
+					GraphQLEnum annotation = getSuperclassAnnotationOrThrow(GraphQLEnum.class, c);
+
+					@Override
+					public String getName() {
+						return annotation.name();
+					}
+
+					@Override
+					public String getDescription() {
+						return ReservedStringUtils.translate(annotation.description());
+					}
+
+					@Override
+					public List<String> getOrder() {
+						return Arrays.asList(annotation.order());
+					}
+
+				} //
+		));
+
+		withFieldExtractors(new ClassFieldExtractor<>( //
+				(c, f) -> f.isAnnotationPresent(GraphQLEnumValue.class), //
+				(c, f) -> new GraphEnumTypeValue.Data() {
+
+					GraphQLEnumValue annotation = getAnnotationOrThrow(GraphQLEnumValue.class, f);
+
+					@Override
+					public String getName() {
+						return annotation.name();
+					}
+
+					@Override
+					public String getDescription() {
+						return ReservedStringUtils.translate(annotation.description());
+					}
+
+					@Override
+					public String getDeprecationReason() {
+						return ReservedStringUtils.translate(annotation.deprecationReason());
+					}
+
+					@Override
+					public Object getValue() {
+						return getEnumValueFromField(c, f);
+					}
+
+				} //
+		));
+
 	}
 
-	public GraphEnumType of(final Class<?> enumTypeClass) {
+	// methods
 
-		if (data.containsKey(enumTypeClass)) {
-			return data.get(enumTypeClass);
-		}
-
-		// check the name is not duplicated
-
-		GraphQLEnum annotation = getTypeAnnotationOrThrow(GraphQLEnum.class, enumTypeClass);
-		if (names.containsKey(annotation.name())) {
-			throw new GraphBuilderException(String.format("Type %s has same name as type %s", enumTypeClass, names.get(annotation.name())));
-		}
-
-		// create
-
-		GraphEnumType enumType = new GraphEnumType(registry, enumTypeClass);
-		data.put(enumTypeClass, enumType);
-		names.put(enumType.getName(), enumTypeClass);
-
-		// return
-
-		return enumType;
-
+	@Override
+	public GraphEnumType createType(Class<?> container) {
+		return new GraphEnumType(registry, container);
 	}
 
-	// getters
-
-	public boolean contains(Class<?> enumTypeClass) {
-		return data.containsKey(enumTypeClass);
-	}
-
-	public GraphEnumType get(Class<?> enumTypeClass) {
-		return data.get(enumTypeClass);
-	}
-
-	public GraphQLTypeReference getGraphQLType(Class<?> enumTypeClass) {
-		return typeRef(data.get(enumTypeClass).getName());
-	}
-
-	public Collection<GraphEnumType> all() {
-		return data.values();
+	@Override
+	public GraphQLTypeReference getGraphQLType(Class<?> container) {
+		return typeRef(data.get(container).getName());
 	}
 
 }

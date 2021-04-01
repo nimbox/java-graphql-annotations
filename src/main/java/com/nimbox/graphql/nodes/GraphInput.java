@@ -1,9 +1,8 @@
-package com.nimbox.graphql.inputs;
+package com.nimbox.graphql.nodes;
 
 import static graphql.schema.GraphQLList.list;
 import static graphql.schema.GraphQLNonNull.nonNull;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
@@ -21,15 +20,15 @@ public abstract class GraphInput {
 
 	// constructors
 
-	GraphInput(GraphInputTypeDefinition definition) {
+	GraphInput(final GraphInputTypeDefinition definition) {
 		this.definition = definition;
 	}
 
-	static GraphInput of(final GraphRegistry registry, final Class<? extends Annotation> annotation, final String name, final GraphInputTypeDefinition definition) {
+	static GraphInput of(final GraphRegistry registry, final String name, final GraphInputTypeDefinition definition) {
 
 		Class<?> type = definition.getType();
-		
-		if (registry.getScalars().contains(type)) {
+
+		if (registry.getScalars().containsType(type)) {
 			return new GraphInputScalar(definition);
 		}
 
@@ -42,18 +41,18 @@ public abstract class GraphInput {
 		}
 
 		throw new GraphBuilderException(String.format( //
-				"Element %s annotated with %s does not have a recognized return type %s", //
-				name, annotation, type //
+				"Input Element %s does not have a recognized return type %s", //
+				name, type //
 		));
 
 	}
 
-	public static GraphInput of(final GraphRegistry registry, final Class<? extends Annotation> annotation, final String name, final Method method) {
-		return of(registry, annotation, name, new GraphInputTypeDefinition(registry, method, method.getGenericReturnType()));
+	public static GraphInput of(final GraphRegistry registry, final String name, final Method method) {
+		return of(registry, name, new GraphInputTypeDefinition(registry, method, method.getGenericReturnType()));
 	}
 
-	public static GraphInput of(final GraphRegistry registry, final Class<? extends Annotation> annotation, final String name, final Parameter parameter) {
-		return of(registry, annotation, name, new GraphInputTypeDefinition(registry, parameter, parameter.getParameterizedType()));
+	public static GraphInput of(final GraphRegistry registry, final String name, final Parameter parameter) {
+		return of(registry, name, new GraphInputTypeDefinition(registry, parameter, parameter.getParameterizedType()));
 	}
 
 	// getters
@@ -83,6 +82,6 @@ public abstract class GraphInput {
 
 	}
 
-	abstract GraphQLInputType getInternalGraphQLInputType(GraphRegistry registry);
+	abstract GraphQLInputType getInternalGraphQLInputType(final GraphRegistry registry);
 
 }

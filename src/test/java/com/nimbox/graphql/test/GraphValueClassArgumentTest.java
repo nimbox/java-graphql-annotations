@@ -18,8 +18,8 @@ import com.nimbox.graphql.annotations.GraphQLId;
 import com.nimbox.graphql.annotations.GraphQLInput;
 import com.nimbox.graphql.annotations.GraphQLInputField;
 import com.nimbox.graphql.definitions.GraphInputTypeDefinition;
+import com.nimbox.graphql.definitions.GraphOptionalDefinition;
 import com.nimbox.graphql.registries.GraphRegistry;
-import com.nimbox.graphql.types.GraphOptionalDefinition;
 import com.nimbox.util.Alternative;
 
 class GraphValueClassArgumentTest {

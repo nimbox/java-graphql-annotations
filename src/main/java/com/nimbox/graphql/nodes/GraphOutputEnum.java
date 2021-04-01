@@ -1,4 +1,4 @@
-package com.nimbox.graphql.outputs;
+package com.nimbox.graphql.nodes;
 
 import com.nimbox.graphql.definitions.GraphOutputTypeDefinition;
 import com.nimbox.graphql.registries.GraphRegistry;
@@ -16,7 +16,7 @@ public class GraphOutputEnum extends GraphOutput {
 	// getters
 
 	@Override
-	public GraphQLOutputType getGraphQLOutputType(GraphRegistry registry) {
+	public GraphQLOutputType getInternalGraphQLOutputType(final GraphRegistry registry) {
 		return registry.getEnums().getGraphQLType(definition.getType());
 	}
 

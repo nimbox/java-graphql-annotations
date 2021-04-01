@@ -1,10 +1,5 @@
 package com.nimbox.graphql.test;
 
-import com.nimbox.graphql.MethodScanner;
-import com.nimbox.graphql.TypeScanner;
-import com.nimbox.graphql.registries.GraphRegistry;
-import com.nimbox.graphql.test.domain.Episode;
-
 public class ScannerRunner {
 
 	public static void main(String[] args) {

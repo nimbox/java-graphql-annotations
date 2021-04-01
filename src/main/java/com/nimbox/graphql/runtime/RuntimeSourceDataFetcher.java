@@ -10,14 +10,14 @@ import graphql.schema.DataFetchingEnvironment;
 public class RuntimeSourceDataFetcher<T> extends RuntimeDataFetcher<T> {
 
 	// constructors
-	
-	public RuntimeSourceDataFetcher(final RuntimeParameterFactory factory, final Class<?> typeClass, final Method fieldMethod, final List<GraphParameter> parameters) {
-		super(factory, fieldMethod, parameters);
+
+	public RuntimeSourceDataFetcher(final RuntimeParameterFactory factory, final Class<?> container, final Method method, final List<GraphParameter> parameters) {
+		super(factory, method, parameters);
 
 	}
 
 	// methods
-	
+
 	public Object getSource(DataFetchingEnvironment environment) {
 		return environment.getSource();
 	}

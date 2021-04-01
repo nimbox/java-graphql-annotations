@@ -17,8 +17,8 @@ public class RuntimeInstanceDataFetcher<T> extends RuntimeDataFetcher<T> {
 
 	// constructors
 
-	public RuntimeInstanceDataFetcher(final RuntimeParameterFactory factory, final Class<?> typeClass, final Method fieldMethod, final List<GraphParameter> parameters) {
-		super(factory, fieldMethod, parameters);
+	public RuntimeInstanceDataFetcher(final RuntimeParameterFactory factory, final Class<?> typeClass, final Method method, final List<GraphParameter> parameters) {
+		super(factory, method, parameters);
 		this.instance = getClassInstanceOrThrow(typeClass);
 	}
 

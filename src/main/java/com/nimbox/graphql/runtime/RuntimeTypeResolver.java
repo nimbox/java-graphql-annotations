@@ -14,16 +14,16 @@ public class RuntimeTypeResolver implements TypeResolver {
 
 	// properties
 
-	private final Class<?> interfaceTypeClass;
-	private final Map<Class<?>, String> types = new HashMap<Class<?>, String>();
+	private final Class<?> container;
+	private final Map<Class<?>, String> implementations = new HashMap<Class<?>, String>();
 
 	// constructors
 
-	public RuntimeTypeResolver(Class<?> interfaceTypeClass, List<GraphObjectType> implementations) {
+	public RuntimeTypeResolver(Class<?> container, List<GraphObjectType> implementations) {
 
-		this.interfaceTypeClass = interfaceTypeClass;
-		for (GraphObjectType objectType : implementations) {
-			this.types.put(objectType.getObjectTypeClass(), objectType.getName());
+		this.container = container;
+		for (GraphObjectType referenceContainer : implementations) {
+			this.implementations.put(referenceContainer.getContainer(), referenceContainer.getName());
 		}
 
 	}
@@ -35,12 +35,12 @@ public class RuntimeTypeResolver implements TypeResolver {
 
 		Object object = environment.getObject();
 
-		String name = types.get(object.getClass());
+		String name = implementations.get(object.getClass());
 		if (name != null) {
 			return environment.getSchema().getObjectType(name);
 		}
 
-		throw new IllegalArgumentException(String.format("Unable to resolve %s as interface %s", object.getClass(), interfaceTypeClass));
+		throw new IllegalArgumentException(String.format("Unable to resolve %s as interface %s", object.getClass(), container));
 
 	}
 
