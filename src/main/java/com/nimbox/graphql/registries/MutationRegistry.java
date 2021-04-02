@@ -1,54 +1,52 @@
 package com.nimbox.graphql.registries;
 
+import static com.nimbox.graphql.utils.IntrospectionUtils.getAnnotationOrThrow;
+
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import com.nimbox.graphql.annotations.GraphQLMutation;
+import com.nimbox.graphql.types.GraphField;
 import com.nimbox.graphql.types.GraphMutationField;
+import com.nimbox.graphql.utils.ReservedStringUtils;
 
-public class MutationRegistry {
-
-	// properties
-
-	private final GraphRegistry registry;
-	private Map<Class<?>, Map<Method, GraphMutationField>> data = new HashMap<Class<?>, Map<Method, GraphMutationField>>();
+public class MutationRegistry extends OperationRegistry<GraphMutationField> {
 
 	// constructors
 
 	public MutationRegistry(GraphRegistry registry) {
-		this.registry = registry;
+		super(registry);
+
+		withFieldExtractors(new ClassFieldExtractor<>( //
+				(c, m) -> m.isAnnotationPresent(GraphQLMutation.class), //
+				(c, m) -> new GraphField.Data() {
+
+					GraphQLMutation annotation = getAnnotationOrThrow(GraphQLMutation.class, m);
+
+					@Override
+					public String getName() {
+						return annotation.name();
+					}
+
+					@Override
+					public String getDescription() {
+						return ReservedStringUtils.translate(annotation.description());
+					}
+
+					@Override
+					public String getDeprecationReason() {
+						return ReservedStringUtils.translate(annotation.deprecationReason());
+					}
+
+				} //
+
+		));
+
 	}
 
-	public Map<Method, GraphMutationField> of(final Class<?> typeClass) {
+	// methods
 
-		if (data.containsKey(typeClass)) {
-			return data.get(typeClass);
-		}
-
-		// create
-
-		Map<Method, GraphMutationField> queries = new HashMap<Method, GraphMutationField>();
-		data.put(typeClass, queries);
-
-		for (Method fieldMethod : typeClass.getMethods()) {
-			if (fieldMethod.isAnnotationPresent(GraphQLMutation.class)) {
-				queries.put(fieldMethod, new GraphMutationField(registry, typeClass, fieldMethod));
-			}
-		}
-
-		// return
-
-		return queries;
-
-	}
-
-	// getters
-
-	public List<GraphMutationField> all() {
-		return data.values().stream().flatMap(m -> m.values().stream()).collect(Collectors.toList());
+	public GraphMutationField createType(final Class<?> container, Method method) {
+		return new GraphMutationField(registry, container, method);
 	}
 
 }

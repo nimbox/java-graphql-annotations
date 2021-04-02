@@ -113,7 +113,7 @@ public class GraphWrappedTypeDefinition extends GraphTypeDefinition {
 			if (type instanceof ParameterizedType) {
 				checkOptionalOrList(registry, type);
 			} else {
-				complete(type);
+				complete(registry, type);
 			}
 
 		}
@@ -130,7 +130,7 @@ public class GraphWrappedTypeDefinition extends GraphTypeDefinition {
 					checkList(registry, current);
 				} else {
 					optionalType = (Class<?>) parameterized.getRawType();
-					complete(current);
+					complete(registry, current);
 				}
 
 				return;
@@ -145,7 +145,7 @@ public class GraphWrappedTypeDefinition extends GraphTypeDefinition {
 				if (current instanceof ParameterizedType) {
 					checkOptional(registry, current);
 				} else {
-					complete(current);
+					complete(registry, current);
 				}
 
 				return;
@@ -168,7 +168,7 @@ public class GraphWrappedTypeDefinition extends GraphTypeDefinition {
 				if (current instanceof ParameterizedType) {
 					checkOptional(registry, current);
 				} else {
-					complete(current);
+					complete(registry, current);
 				}
 
 				return;
@@ -189,7 +189,7 @@ public class GraphWrappedTypeDefinition extends GraphTypeDefinition {
 
 				Type current = parameterized.getActualTypeArguments()[0];
 				if (!(current instanceof ParameterizedType)) {
-					complete(current);
+					complete(registry, current);
 					return;
 				}
 
@@ -199,11 +199,16 @@ public class GraphWrappedTypeDefinition extends GraphTypeDefinition {
 
 		}
 
-		private void complete(final Type type) {
+		private void complete(final GraphRegistry registry, final Type type) {
 
 			if (type.equals(Void.TYPE)) {
 				throw new GraphBuilderException("Return type must not be void");
 			}
+
+			if (this.isId && !registry.isIdType((Class<?>) type)) {
+				throw new GraphBuilderException(String.format("Unrecognized id type %s", type));
+			}
+
 			this.type = (Class<?>) type;
 
 		}

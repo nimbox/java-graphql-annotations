@@ -9,6 +9,7 @@ import com.nimbox.graphql.types.GraphScalarType;
 
 public class RuntimeArgumentFactory {
 
+	private Map<Class<?>, RuntimeIdExtractor> ids = new HashMap<Class<?>, RuntimeIdExtractor>();
 	private Map<Class<?>, RuntimeArgumentExtractor> extractors = new HashMap<Class<?>, RuntimeArgumentExtractor>();
 
 	// constructors
@@ -16,6 +17,8 @@ public class RuntimeArgumentFactory {
 	public RuntimeArgumentFactory() {
 
 		extractors.put(Integer.class, new RuntimeArgumentExtractorGet());
+		extractors.put(Long.class, new RuntimeArgumentExtractorGet());
+
 		extractors.put(Double.class, new RuntimeArgumentExtractorGet());
 		extractors.put(String.class, new RuntimeArgumentExtractorGet());
 		extractors.put(Boolean.class, new RuntimeArgumentExtractorGet());

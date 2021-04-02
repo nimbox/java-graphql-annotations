@@ -9,7 +9,7 @@ import com.nimbox.graphql.utils.ReservedStringUtils;
 
 import graphql.schema.GraphQLTypeReference;
 
-public class UnionTypeRegistry extends GraphTypeRegistry<GraphUnionType, Class<?>, GraphUnionType.Data> {
+public class UnionTypeRegistry extends TypeRegistry<GraphUnionType, Class<?>, GraphUnionType.Data> {
 
 	// constructors
 

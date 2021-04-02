@@ -2,7 +2,7 @@ package com.nimbox.graphql.test;
 
 import java.util.List;
 
-import com.nimbox.canexer.locals.api.utils.Kind;
+import com.nimbox.canexer.api.utils.Kind;
 import com.nimbox.graphql.scanners.ClassScanner;
 
 public class ClassScannerRunner {

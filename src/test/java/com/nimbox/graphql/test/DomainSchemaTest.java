@@ -4,14 +4,14 @@ import static com.nimbox.graphql.utils.IntrospectionUtils.getAnnotationOrThrow;
 import static com.nimbox.graphql.utils.IntrospectionUtils.getSuperclassAnnotationOrThrow;
 
 import java.lang.reflect.Modifier;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.nimbox.canexer.locals.api.utils.Kind;
-import com.nimbox.canexer.locals.api.utils.Property;
+import com.nimbox.canexer.api.utils.Kind;
+import com.nimbox.canexer.api.utils.Property;
 import com.nimbox.graphql.GraphBuilder;
 import com.nimbox.graphql.scalars.InstantScalar;
 import com.nimbox.graphql.scalars.LocalDateTimeScalar;
@@ -45,8 +45,12 @@ class DomainSchemaTest {
 
 		builder = new GraphBuilder();
 
-		builder.withOptional(Alternative.class, Alternative::undefined, Alternative::ofNullable);
 		builder.withContext(DataFetchingEnvironment.class, environment -> environment);
+
+		builder.withIdExtractors(e -> e.isAnnotationPresent(Property.class) && e.getAnnotation(Property.class).id());		
+		builder.withIdCoercing(Long.class, id -> id.toString(), s -> Long.valueOf(s));
+		
+		builder.withOptional(Alternative.class, Alternative::undefined, Alternative::ofNullable);
 
 		builder.withObjectExtractor( //
 				c -> !Modifier.isAbstract(c.getModifiers()) && c.isAnnotationPresent(Kind.class), //
@@ -66,13 +70,13 @@ class DomainSchemaTest {
 
 					@Override
 					public List<String> getOrder() {
-						return Collections.emptyList();
+						return Arrays.asList(annotation.order());
 					}
 
 				});
 
 		builder.withObjectFieldExtractor( //
-				(c, m) -> !Modifier.isAbstract(c.getModifiers()) && m.isAnnotationPresent(Property.class), //
+				(c, m) -> !Modifier.isAbstract(c.getModifiers()) && m.isAnnotationPresent(Property.class) && m.getAnnotation(Property.class).expose(), //
 				(c, m) -> new GraphObjectTypeField.Data() {
 
 					Property annotation = getAnnotationOrThrow(Property.class, m);
@@ -112,13 +116,13 @@ class DomainSchemaTest {
 
 					@Override
 					public List<String> getOrder() {
-						return Collections.emptyList();
+						return Arrays.asList(annotation.order());
 					}
 
 				});
 
 		builder.withInterfaceFieldExtractor( //
-				(c, m) -> Modifier.isAbstract(c.getModifiers()) && m.isAnnotationPresent(Property.class), //
+				(c, m) -> Modifier.isAbstract(c.getModifiers()) && m.isAnnotationPresent(Property.class) && m.getAnnotation(Property.class).expose(), //
 				(c, m) -> new GraphInterfaceTypeField.Data() {
 
 					Property annotation = getAnnotationOrThrow(Property.class, m);
@@ -159,14 +163,14 @@ class DomainSchemaTest {
 		GraphUtils.printSchema(schema);
 		GraphQL graphQL = GraphQL.newGraphQL(schema).build();
 
-//		ExecutionResult result = graphQL.execute("{ getCharacter { id name } }");
+		ExecutionResult result = graphQL.execute("{ getCharacter(id: 999) { id name } }");
 //		ExecutionResult result = graphQL.execute("{ getHumans(limit: 123, age: 22) { id name } }");
 //		ExecutionResult result = graphQL.execute("{ getHumanInput(input: { name: \"Ricardo\", address: \"Naco\" } ) { id name } }");
 
 //		ExecutionResult result = graphQL.execute("{ getHumansByEpisode(episode: NEWHOPE, age: 81) { getFriends { id name } } }");
 //		ExecutionResult result = graphQL.execute("{ getHumansByEpisode(episode: NEWHOPE) { getFriends { id name } } }");
 
-		ExecutionResult result = graphQL.execute("mutation { createHuman(input: { name: \"Ricardo\", address: \"Naco\" }) { id name } }");
+//		ExecutionResult result = graphQL.execute("mutation { createHuman(input: { name: \"Ricardo\", address: \"Naco\" }) { id name } }");
 
 		System.out.println(result);
 

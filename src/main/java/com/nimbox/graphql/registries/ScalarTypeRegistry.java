@@ -25,7 +25,7 @@ import graphql.schema.GraphQLTypeReference;
  * output of the coercing class.
  *
  */
-public class ScalarTypeRegistry extends GraphTypeRegistry<GraphScalarType, Class<? extends Coercing<?, ?>>, GraphScalarType.Data> {
+public class ScalarTypeRegistry extends TypeRegistry<GraphScalarType, Class<? extends Coercing<?, ?>>, GraphScalarType.Data> {
 
 	// properties
 

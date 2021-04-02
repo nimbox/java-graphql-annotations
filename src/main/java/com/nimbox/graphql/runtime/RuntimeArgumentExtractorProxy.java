@@ -23,7 +23,7 @@ public class RuntimeArgumentExtractorProxy implements RuntimeArgumentExtractor {
 
 	// constructors
 
-	public RuntimeArgumentExtractorProxy(RuntimeArgumentFactory factory, GraphInputObjectType inputObjectType) {
+	public RuntimeArgumentExtractorProxy(final RuntimeArgumentFactory factory, final GraphInputObjectType inputObjectType) {
 
 		this.factory = factory;
 
@@ -38,7 +38,7 @@ public class RuntimeArgumentExtractorProxy implements RuntimeArgumentExtractor {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Object apply(Map<String, Object> arguments, RuntimeParameter parameter) throws Exception {
+	public Object apply(final Map<String, Object> arguments, final RuntimeParameter parameter) throws Exception {
 
 		String name = parameter.name;
 		GraphInputTypeDefinition definition = ((RuntimeParameterArgument) parameter).getDefinition();
@@ -52,6 +52,8 @@ public class RuntimeArgumentExtractorProxy implements RuntimeArgumentExtractor {
 		}
 
 		Object value = arguments.get(name);
+		// Translate the string id not required since it is definitively an input that
+		// gets resolved to a proxy.
 
 		if (definition.isList()) {
 			List<Object> list = new ArrayList<Object>(((List<?>) value).size());

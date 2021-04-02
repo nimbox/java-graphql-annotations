@@ -20,7 +20,7 @@ import com.nimbox.graphql.utils.ReservedStringUtils;
 
 import graphql.schema.GraphQLTypeReference;
 
-public class ObjectTypeExtensionRegistry extends GraphTypeFieldRegistry<GraphObjectTypeExtension, Class<?>, Method, GraphObjectTypeExtension.Data, GraphObjectTypeField.Data> {
+public class ObjectTypeExtensionRegistry extends TypeFieldRegistry<GraphObjectTypeExtension, Class<?>, Method, GraphObjectTypeExtension.Data, GraphObjectTypeField.Data> {
 
 	// properties
 

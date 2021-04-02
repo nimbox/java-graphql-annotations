@@ -21,15 +21,17 @@ public class GraphRegistry {
 	// properties
 	//
 
-	private final Map<Class<?>, Map<String, DataFetcher<?>>> contexts = new HashMap<Class<?>, Map<String, DataFetcher<?>>>();
+	private final Map<Class<?>, Map<String, DataFetcher<?>>> contexts = new HashMap<>();
 
-	private final List<Predicate<AnnotatedElement>> idPredicates = new ArrayList<>();
-	private final List<Predicate<AnnotatedElement>> notNullPredicates = new ArrayList<>();
-	private final Map<Class<?>, GraphOptionalDefinition<?>> optionals = new HashMap<Class<?>, GraphOptionalDefinition<?>>();
+	private final List<Predicate<AnnotatedElement>> idExtractors = new ArrayList<>();
+	private final Map<Class<?>, IdCoercing<?>> idCoercings = new HashMap<>();
+
+	private final List<Predicate<AnnotatedElement>> notNullExtractors = new ArrayList<>();
+	private final Map<Class<?>, GraphOptionalDefinition<?>> optionals = new HashMap<>();
 
 	// names
 
-	private final Map<String, Class<?>> names = new HashMap<String, Class<?>>();
+	private final Map<String, Class<?>> names = new HashMap<>();
 
 	// registries
 
@@ -52,8 +54,10 @@ public class GraphRegistry {
 
 	public GraphRegistry() {
 
-		this.withId(c -> c.isAnnotationPresent(GraphQLId.class));
-		this.withNotNull(c -> c.isAnnotationPresent(GraphQLNotNull.class));
+		this.withIdExtractor(c -> c.isAnnotationPresent(GraphQLId.class));
+		this.withIdCoercing(new IdCoercing<String>(String.class, id -> id, s -> s));
+
+		this.withNotNullExtractor(c -> c.isAnnotationPresent(GraphQLNotNull.class));
 		this.withOptional(new GraphOptionalDefinition<>(Optional.class, () -> null, Optional::ofNullable));
 
 		this.scalars = new ScalarTypeRegistry(this);
@@ -84,13 +88,14 @@ public class GraphRegistry {
 
 	//
 
-	public GraphRegistry withId(Predicate<AnnotatedElement> predicate) {
-		idPredicates.add(predicate);
+	public GraphRegistry withIdExtractor(Predicate<AnnotatedElement> predicate) {
+		idExtractors.add(predicate);
 		return this;
 	}
 
 	public boolean isId(AnnotatedElement element) {
-		for (Predicate<AnnotatedElement> p : idPredicates) {
+
+		for (Predicate<AnnotatedElement> p : idExtractors) {
 			if (p.test(element)) {
 				return true;
 			}
@@ -98,13 +103,28 @@ public class GraphRegistry {
 		return false;
 	}
 
-	public GraphRegistry withNotNull(Predicate<AnnotatedElement> predicate) {
-		notNullPredicates.add(predicate);
+	public GraphRegistry withIdCoercing(IdCoercing<?> coercing) {
+		idCoercings.put(coercing.getType(), coercing);
+		return this;
+	}
+
+	public boolean isIdType(Class<?> type) {
+		return idCoercings.containsKey(type);
+	}
+
+	public IdCoercing<?> getIdCoercing(Class<?> type) {
+		return idCoercings.get(type);
+	}
+
+	//
+
+	public GraphRegistry withNotNullExtractor(Predicate<AnnotatedElement> predicate) {
+		notNullExtractors.add(predicate);
 		return this;
 	}
 
 	public boolean isNotNull(AnnotatedElement element) {
-		for (Predicate<AnnotatedElement> p : notNullPredicates) {
+		for (Predicate<AnnotatedElement> p : notNullExtractors) {
 			if (p.test(element)) {
 				return true;
 			}

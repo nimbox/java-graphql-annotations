@@ -17,7 +17,7 @@ import com.nimbox.graphql.utils.ReservedStringUtils;
 
 import graphql.schema.GraphQLTypeReference;
 
-public class ObjectTypeRegistry extends GraphTypeFieldRegistry<GraphObjectType, Class<?>, Method, GraphObjectType.Data, GraphObjectTypeField.Data> {
+public class ObjectTypeRegistry extends TypeFieldRegistry<GraphObjectType, Class<?>, Method, GraphObjectType.Data, GraphObjectTypeField.Data> {
 
 	// constructors
 

@@ -4,6 +4,7 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Type;
 
 import com.nimbox.graphql.registries.GraphRegistry;
+import com.nimbox.graphql.registries.IdCoercing;
 
 /**
  * Represents a GraphQL value class that can be of the form
@@ -17,6 +18,8 @@ public class GraphInputTypeDefinition extends GraphWrappedTypeDefinition {
 
 	// properties
 
+	final IdCoercing<?> idCoercing;
+
 	final GraphOptionalDefinition<?> optionalDefinition;
 	final GraphOptionalDefinition<?> optionalListDefinition;
 
@@ -25,9 +28,17 @@ public class GraphInputTypeDefinition extends GraphWrappedTypeDefinition {
 	public GraphInputTypeDefinition(final GraphRegistry registry, final AnnotatedElement element, final Type parameterizedType) {
 		super(new Builder(registry, element, parameterizedType));
 
+		this.idCoercing = isId() ? registry.getIdCoercing(getType()) : null;
+
 		this.optionalDefinition = registry.getOptionalDefinition(this.optionalType);
 		this.optionalListDefinition = registry.getOptionalDefinition(this.optionalListType);
 
+	}
+
+	// methods
+
+	public Object parseId(Object value) {
+		return idCoercing.parse(((String) value));
 	}
 
 	// methods

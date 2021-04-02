@@ -57,7 +57,7 @@ public class GraphEnumType {
 	}
 
 	public Optional<String> getDescription() {
-		return Optional.of(description);
+		return Optional.ofNullable(description);
 	}
 
 	public List<String> getOrder() {

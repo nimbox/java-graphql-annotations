@@ -14,7 +14,7 @@ public class GraphMutationField extends GraphField {
 	// constructor
 
 	public GraphMutationField(final GraphRegistry registry, Class<?> container, final Method method) {
-		super(registry, container, method, registry.getObjects().extractTypeFieldData(container, method));
+		super(registry, container, method, registry.getMutations().extractTypeFieldData(container, method));
 	}
 
 	// methods

@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.nimbox.graphql.GraphBuilderException;
 
-public abstract class GraphTypeFieldRegistry<T, C, F, CD, FD> extends GraphTypeRegistry<T, C, CD> {
+public abstract class TypeFieldRegistry<T, C, F, CD, FD> extends TypeRegistry<T, C, CD> {
 
 	// properties
 
@@ -14,7 +14,7 @@ public abstract class GraphTypeFieldRegistry<T, C, F, CD, FD> extends GraphTypeR
 
 	// constructors
 
-	GraphTypeFieldRegistry(GraphRegistry registry) {
+	TypeFieldRegistry(GraphRegistry registry) {
 		super(registry);
 	}
 

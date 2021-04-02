@@ -57,7 +57,7 @@ public class GraphScalarType {
 	}
 
 	public Optional<String> getDescription() {
-		return Optional.of(description);
+		return Optional.ofNullable(description);
 	}
 
 	public GraphQLScalarType built() {

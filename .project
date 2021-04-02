@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>java-graphql-annotations</name>
-	<comment>Project java-graphql-annotations created by Buildship.</comment>
+	<name>java-graphql-builder</name>
+	<comment>Project java-graphql-builder created by Buildship.</comment>
 	<projects>
 	</projects>
 	<buildSpec>

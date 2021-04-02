@@ -7,6 +7,7 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +24,9 @@ import com.nimbox.graphql.definitions.GraphOptionalDefinition;
 import com.nimbox.graphql.registries.ClassExtractor;
 import com.nimbox.graphql.registries.ClassFieldExtractor;
 import com.nimbox.graphql.registries.GraphRegistry;
+import com.nimbox.graphql.registries.IdCoercing;
+import com.nimbox.graphql.registries.IdCoercing.ParseFunction;
+import com.nimbox.graphql.registries.IdCoercing.SerializeFunction;
 import com.nimbox.graphql.runtime.RuntimeParameterFactory;
 import com.nimbox.graphql.types.GraphEnumType;
 import com.nimbox.graphql.types.GraphEnumTypeValue;
@@ -56,8 +60,10 @@ public class GraphBuilder {
 
 	private Map<Class<?>, Map<String, DataFetcher<?>>> contexts = new HashMap<>();
 
-	private final List<Predicate<AnnotatedElement>> idPredicates = new ArrayList<>();
-	private final List<Predicate<AnnotatedElement>> notNullPredicates = new ArrayList<>();
+	private final List<Predicate<AnnotatedElement>> idExtractors = new ArrayList<>();
+	private final Map<Class<?>, IdCoercing<?>> idCoercings = new HashMap<>();
+
+	private final List<Predicate<AnnotatedElement>> notNullExtractors = new ArrayList<>();
 	private List<GraphOptionalDefinition<?>> optionals = new ArrayList<>();
 
 	private final List<ClassExtractor<Class<?>, GraphInterfaceType.Data>> interfaceExtractors = new ArrayList<>();
@@ -101,17 +107,24 @@ public class GraphBuilder {
 		return this;
 	}
 
-	// predicates
+	// ids
 
 	@SafeVarargs
-	public final GraphBuilder withId(Predicate<AnnotatedElement>... predicates) {
-		return withId(Arrays.asList(predicates));
+	public final GraphBuilder withIdExtractors(Predicate<AnnotatedElement>... predicates) {
+		return withIdExtractors(Arrays.asList(predicates));
 	}
 
-	public final GraphBuilder withId(List<Predicate<AnnotatedElement>> predicates) {
-		this.idPredicates.addAll(predicates);
+	public final GraphBuilder withIdExtractors(List<Predicate<AnnotatedElement>> predicates) {
+		this.idExtractors.addAll(predicates);
 		return this;
 	}
+
+	public final <T> GraphBuilder withIdCoercing(final Class<T> type, final SerializeFunction<T> serialize, final ParseFunction<T> parse) {
+		idCoercings.put(type, new IdCoercing<T>(type, serialize, parse));
+		return this;
+	}
+
+	// not nulls
 
 	@SafeVarargs
 	public final GraphBuilder withNotNull(Predicate<AnnotatedElement>... predicates) {
@@ -119,7 +132,7 @@ public class GraphBuilder {
 	}
 
 	public final GraphBuilder withNotNull(List<Predicate<AnnotatedElement>> predicates) {
-		this.notNullPredicates.addAll(predicates);
+		this.notNullExtractors.addAll(predicates);
 		return this;
 	}
 
@@ -249,15 +262,17 @@ public class GraphBuilder {
 
 		contexts.forEach((c, m) -> m.forEach((n, f) -> registry.withContext((Class<Object>) c, n, (DataFetcher<Object>) f)));
 
-		idPredicates.forEach(registry::withId);
-		notNullPredicates.forEach(registry::withNotNull);
+		idExtractors.forEach(registry::withIdExtractor);
+		idCoercings.values().forEach(registry::withIdCoercing);
+
+		notNullExtractors.forEach(registry::withNotNullExtractor);
 		optionals.forEach(registry::withOptional);
 
 		scalars.stream().forEach(registry.getScalars()::compute);
 		enums.stream().forEach(registry.getEnums()::compute);
 
-		operations.stream().forEach(registry.getQueries()::of);
-		operations.stream().forEach(registry.getMutations()::of);
+		operations.stream().forEach(registry.getQueries()::compute);
+		operations.stream().forEach(registry.getMutations()::compute);
 
 		objects.stream().forEach(registry.getObjects()::compute);
 		objectExtensions.stream().forEach(registry.getObjectExtensions()::compute);
@@ -340,7 +355,7 @@ public class GraphBuilder {
 
 	private void buildQueries(GraphRegistry registry, RuntimeParameterFactory factory, GraphQLSchema.Builder builder, GraphQLCodeRegistry.Builder codeBuilder) {
 
-		List<GraphQueryField> queries = registry.getQueries().all();
+		Collection<GraphQueryField> queries = registry.getQueries().all();
 		if (!queries.isEmpty()) {
 
 			GraphQLObjectType.Builder objectTypeBuilder = GraphQLObjectType.newObject();
@@ -367,7 +382,7 @@ public class GraphBuilder {
 
 	private void buildMutations(GraphRegistry registry, RuntimeParameterFactory factory, GraphQLSchema.Builder builder, GraphQLCodeRegistry.Builder codeBuilder) {
 
-		List<GraphMutationField> mutations = registry.getMutations().all();
+		Collection<GraphMutationField> mutations = registry.getMutations().all();
 		if (!mutations.isEmpty()) {
 
 			GraphQLObjectType.Builder objectTypeBuilder = GraphQLObjectType.newObject();
@@ -406,6 +421,8 @@ public class GraphBuilder {
 			interfaceTypeBuilder.comparatorRegistry(AS_IS_REGISTRY);
 
 			// build
+
+			System.out.println(fields);
 
 			for (GraphInterfaceTypeField field : fields) {
 				GraphQLFieldDefinition fieldDefinition = field.newFieldDefinition(registry).build();

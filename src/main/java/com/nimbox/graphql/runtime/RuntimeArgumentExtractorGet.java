@@ -16,38 +16,42 @@ class RuntimeArgumentExtractorGet implements RuntimeArgumentExtractor {
 	// methods
 
 	@Override
-	public Object apply(Map<String, Object> arguments, RuntimeParameter parameter) throws Exception {
+	public Object apply(final Map<String, Object> arguments, final RuntimeParameter parameter) throws Exception {
 
 		String name = parameter.name;
-		GraphInputTypeDefinition valueClass = ((RuntimeParameterArgument) parameter).getDefinition();
+		GraphInputTypeDefinition definition = ((RuntimeParameterArgument) parameter).getDefinition();
 
 		if (!arguments.containsKey(name)) {
-			if (valueClass.isList()) {
-				return valueClass.undefinedList();
+			if (definition.isList()) {
+				return definition.undefinedList();
 			} else {
-				return valueClass.undefined();
+				return definition.undefined();
 			}
 		}
 
 		Object value = arguments.get(name);
+		// Translate the string id to an expected type.
+		if (definition.isId()) {
+			value = definition.parseId(value);
+		}
 
-		if (valueClass.isList()) {
+		if (definition.isList()) {
 			List<Object> list = new ArrayList<Object>(((List<?>) value).size());
-			if (valueClass.isOptionalList()) {
-				if (valueClass.isOptional()) {
+			if (definition.isOptionalList()) {
+				if (definition.isOptional()) {
 					for (Object a : (List<?>) value) {
-						list.add(valueClass.nullable(a));
+						list.add(definition.nullable(a));
 					}
 				} else {
 					for (Object a : (List<?>) value) {
 						list.add(a);
 					}
 				}
-				return valueClass.nullableList(value);
+				return definition.nullableList(value);
 			} else {
-				if (valueClass.isOptional()) {
+				if (definition.isOptional()) {
 					for (Object a : (List<?>) value) {
-						list.add(valueClass.nullable(a));
+						list.add(definition.nullable(a));
 					}
 				} else {
 					return value;
@@ -55,8 +59,8 @@ class RuntimeArgumentExtractorGet implements RuntimeArgumentExtractor {
 				return list;
 			}
 		} else {
-			if (valueClass.isOptional()) {
-				return valueClass.nullable(value);
+			if (definition.isOptional()) {
+				return definition.nullable(value);
 			} else {
 				return value;
 			}

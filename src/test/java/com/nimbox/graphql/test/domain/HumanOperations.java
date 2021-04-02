@@ -29,11 +29,11 @@ public class HumanOperations {
 	}
 
 	@GraphQLQuery(name = "getCharacter")
-	public Optional<Character> getCharacter(@GraphQLArgument(name = "id") @GraphQLId String id) {
+	public Optional<Character> getCharacter(@GraphQLArgument(name = "id") @GraphQLId Long id) {
 
 		System.out.println("in get character");
 
-		return Optional.of(new Human(id, "Ricardo", Collections.emptyList(), Collections.emptyList(), "Guacara"));
+		return Optional.of(new Human(id.toString(), "Ricardo", Collections.emptyList(), Collections.emptyList(), "Guacara"));
 
 	}
 

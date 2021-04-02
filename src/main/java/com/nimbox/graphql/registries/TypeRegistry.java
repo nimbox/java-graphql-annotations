@@ -11,7 +11,7 @@ import com.nimbox.graphql.GraphBuilderException;
 
 import graphql.schema.GraphQLTypeReference;
 
-public abstract class GraphTypeRegistry<T, C, D> {
+public abstract class TypeRegistry<T, C, D> {
 
 	// properties
 
@@ -22,7 +22,7 @@ public abstract class GraphTypeRegistry<T, C, D> {
 
 	// constructors
 
-	GraphTypeRegistry(final GraphRegistry registry) {
+	TypeRegistry(final GraphRegistry registry) {
 		this.registry = registry;
 	}
 

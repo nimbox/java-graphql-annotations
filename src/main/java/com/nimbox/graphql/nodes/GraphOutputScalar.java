@@ -1,5 +1,7 @@
 package com.nimbox.graphql.nodes;
 
+import static graphql.Scalars.GraphQLID;
+
 import com.nimbox.graphql.definitions.GraphOutputTypeDefinition;
 import com.nimbox.graphql.registries.GraphRegistry;
 
@@ -17,7 +19,13 @@ public class GraphOutputScalar extends GraphOutput {
 
 	@Override
 	public GraphQLOutputType getInternalGraphQLOutputType(final GraphRegistry registry) {
-		return registry.getScalars().getGraphQLTypeType(definition.getType());
+
+		if (definition.isId()) {
+			return GraphQLID;
+		} else {
+			return registry.getScalars().getGraphQLTypeType(definition.getType());
+		}
+
 	}
 
 }

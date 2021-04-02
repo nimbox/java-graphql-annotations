@@ -1,54 +1,52 @@
 package com.nimbox.graphql.registries;
 
+import static com.nimbox.graphql.utils.IntrospectionUtils.getAnnotationOrThrow;
+
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import com.nimbox.graphql.annotations.GraphQLQuery;
+import com.nimbox.graphql.types.GraphField;
 import com.nimbox.graphql.types.GraphQueryField;
+import com.nimbox.graphql.utils.ReservedStringUtils;
 
-public class QueryRegistry {
-
-	// properties
-
-	private final GraphRegistry registry;
-	private Map<Class<?>, Map<Method, GraphQueryField>> data = new HashMap<Class<?>, Map<Method, GraphQueryField>>();
+public class QueryRegistry extends OperationRegistry<GraphQueryField> {
 
 	// constructors
 
-	public QueryRegistry(GraphRegistry registry) {
-		this.registry = registry;
+	public QueryRegistry(final GraphRegistry registry) {
+		super(registry);
+
+		withFieldExtractors(new ClassFieldExtractor<>( //
+				(c, m) -> m.isAnnotationPresent(GraphQLQuery.class), //
+				(c, m) -> new GraphField.Data() {
+
+					GraphQLQuery annotation = getAnnotationOrThrow(GraphQLQuery.class, m);
+
+					@Override
+					public String getName() {
+						return annotation.name();
+					}
+
+					@Override
+					public String getDescription() {
+						return ReservedStringUtils.translate(annotation.description());
+					}
+
+					@Override
+					public String getDeprecationReason() {
+						return ReservedStringUtils.translate(annotation.deprecationReason());
+					}
+
+				} //
+
+		));
+
 	}
 
-	public Map<Method, GraphQueryField> of(final Class<?> typeClass) {
+	// methods
 
-		if (data.containsKey(typeClass)) {
-			return data.get(typeClass);
-		}
-
-		// create
-
-		Map<Method, GraphQueryField> queries = new HashMap<Method, GraphQueryField>();
-		data.put(typeClass, queries);
-
-		for (Method fieldMethod : typeClass.getMethods()) {
-			if (fieldMethod.isAnnotationPresent(GraphQLQuery.class)) {
-				queries.put(fieldMethod, new GraphQueryField(registry, typeClass, fieldMethod));
-			}
-		}
-
-		// return
-
-		return queries;
-
-	}
-
-	// getters
-
-	public List<GraphQueryField> all() {
-		return data.values().stream().flatMap(m -> m.values().stream()).collect(Collectors.toList());
+	public GraphQueryField createType(final Class<?> container, final Method method) {
+		return new GraphQueryField(registry, container, method);
 	}
 
 }

@@ -1,4 +1,4 @@
-# java-graphql-annotations
+# java-graphql-builder
 
 Yet another graphql annotation processor based on https://github.com/leangen/graphql-spqr.
 
