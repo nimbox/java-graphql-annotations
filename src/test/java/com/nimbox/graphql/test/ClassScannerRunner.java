@@ -2,7 +2,7 @@ package com.nimbox.graphql.test;
 
 import java.util.List;
 
-import com.nimbox.canexer.api.utils.Kind;
+import com.nimbox.canexer.api.utils.Entity;
 import com.nimbox.graphql.scanners.ClassScanner;
 
 public class ClassScannerRunner {
@@ -13,7 +13,7 @@ public class ClassScannerRunner {
 
 		List<Class<?>> classes = scanner //
 				.packages("com.nimbox") //
-				.filter(i -> i.hasAnnotation(Kind.class.getName())) //
+				.filter(i -> i.hasAnnotation(Entity.class.getName())) //
 				.classes();
 
 		System.out.println(classes);

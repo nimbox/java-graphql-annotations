@@ -10,7 +10,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.nimbox.canexer.api.utils.Kind;
+import com.nimbox.canexer.api.utils.Entity;
 import com.nimbox.canexer.api.utils.Property;
 import com.nimbox.graphql.GraphBuilder;
 import com.nimbox.graphql.scalars.InstantScalar;
@@ -40,7 +40,7 @@ class DomainSchemaTest {
 	@BeforeEach
 	void beforeEach() {
 
-		ClassScanner scanner = new ClassScanner().packages("com.nimbox").filter(i -> !i.isAbstract() && i.hasAnnotation(Kind.class.getName()));
+		ClassScanner scanner = new ClassScanner().packages("com.nimbox").filter(i -> !i.isAbstract() && i.hasAnnotation(Entity.class.getName()));
 		System.out.println(scanner.classes());
 
 		builder = new GraphBuilder();
@@ -53,10 +53,10 @@ class DomainSchemaTest {
 		builder.withOptional(Alternative.class, Alternative::undefined, Alternative::ofNullable);
 
 		builder.withObjectExtractor( //
-				c -> !Modifier.isAbstract(c.getModifiers()) && c.isAnnotationPresent(Kind.class), //
+				c -> !Modifier.isAbstract(c.getModifiers()) && c.isAnnotationPresent(Entity.class), //
 				c -> new GraphObjectType.Data() {
 
-					Kind annotation = getSuperclassAnnotationOrThrow(Kind.class, c);
+					Entity annotation = getSuperclassAnnotationOrThrow(Entity.class, c);
 
 					@Override
 					public String getName() {
@@ -99,10 +99,10 @@ class DomainSchemaTest {
 				});
 
 		builder.withInterfaceExtractor( //
-				c -> Modifier.isAbstract(c.getModifiers()) && c.isAnnotationPresent(Kind.class), //
+				c -> Modifier.isAbstract(c.getModifiers()) && c.isAnnotationPresent(Entity.class), //
 				c -> new GraphInterfaceType.Data() {
 
-					Kind annotation = getSuperclassAnnotationOrThrow(Kind.class, c);
+					Entity annotation = getSuperclassAnnotationOrThrow(Entity.class, c);
 
 					@Override
 					public String getName() {

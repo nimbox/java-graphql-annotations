@@ -26,7 +26,7 @@ public class RuntimeSourceExtensionDataFetcher<T> extends RuntimeDataFetcher<T> 
 	// methods
 
 	public Object getSource(DataFetchingEnvironment environment) throws Exception {
-		return constructor.newInstance(environment.getSource());
+		return constructor.newInstance(new Object[] { environment.getSource() });
 	}
 
 }

@@ -422,8 +422,6 @@ public class GraphBuilder {
 
 			// build
 
-			System.out.println(fields);
-
 			for (GraphInterfaceTypeField field : fields) {
 				GraphQLFieldDefinition fieldDefinition = field.newFieldDefinition(registry).build();
 				interfaceTypeBuilder.field(fieldDefinition);

@@ -16,7 +16,7 @@ public abstract class RuntimeDataFetcher<T> implements DataFetcher<T> {
 
 	private final RuntimeParameterFactory factory;
 
-	private final Method fieldMethod;
+	private final Method method;
 	private final List<RuntimeParameter> parameters;
 
 	// constructors
@@ -25,7 +25,7 @@ public abstract class RuntimeDataFetcher<T> implements DataFetcher<T> {
 
 		this.factory = factory;
 
-		this.fieldMethod = fieldMethod;
+		this.method = fieldMethod;
 		this.parameters = parameters.stream().map(GraphParameter::getRuntimeParameter).collect(toUnmodifiableList());
 
 	}
@@ -38,12 +38,19 @@ public abstract class RuntimeDataFetcher<T> implements DataFetcher<T> {
 	@SuppressWarnings("unchecked")
 	public T get(DataFetchingEnvironment environment) throws Exception {
 
-		Object[] args = new Object[parameters.size()];
-		for (int i = 0; i < parameters.size(); i++) {
-			args[i] = factory.get(environment, parameters.get(i));
-		}
+		try {
 
-		return (T) fieldMethod.invoke(getSource(environment), args);
+			Object[] args = new Object[parameters.size()];
+			for (int i = 0; i < parameters.size(); i++) {
+				args[i] = factory.get(environment, parameters.get(i));
+			}
+
+			return (T) method.invoke(getSource(environment), args);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
 
 	}
 
