@@ -67,13 +67,13 @@ public abstract class GraphInput {
 
 		GraphQLInputType type = getInternalGraphQLInputType(registry);
 
-		if (!definition.isOptional()) {
+		if (definition.isNotNull()) {
 			type = nonNull(type);
 		}
 
 		if (definition.isList()) {
 			type = list(type);
-			if (!definition.isOptionalList()) {
+			if (definition.isListNotNull()) {
 				type = nonNull(type);
 			}
 		}

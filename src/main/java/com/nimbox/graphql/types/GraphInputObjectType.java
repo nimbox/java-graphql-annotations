@@ -4,7 +4,7 @@ import static graphql.schema.GraphqlTypeComparatorRegistry.AS_IS_REGISTRY;
 
 import java.lang.reflect.Method;
 import java.util.Comparator;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -23,7 +23,7 @@ public class GraphInputObjectType {
 	private final String description;
 	private final List<String> order;
 
-	private final Map<Method, GraphInputObjectTypeField> fields = new HashMap<Method, GraphInputObjectTypeField>();
+	private final Map<Method, GraphInputObjectTypeField> fields = new LinkedHashMap<>();
 
 	// constructors
 

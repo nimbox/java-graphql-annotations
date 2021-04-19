@@ -3,9 +3,9 @@ package com.nimbox.graphql.test.domain;
 import com.nimbox.canexer.api.locals.Local;
 import com.nimbox.canexer.api.locals.User;
 import com.nimbox.graphql.annotations.GraphQLField;
-import com.nimbox.graphql.annotations.GraphQLTypeExtension;
+import com.nimbox.graphql.annotations.GraphQLExtension;
 
-@GraphQLTypeExtension(type = Local.class)
+@GraphQLExtension(type = Local.class)
 public class LocalExtension {
 
 	private final Local local;

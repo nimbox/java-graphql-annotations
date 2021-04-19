@@ -40,10 +40,12 @@ public class GraphRegistry {
 	private final InputObjectTypeRegistry inputObjects;
 
 	private final InterfaceTypeRegistry interfaces;
-	private final UnionTypeRegistry unions;
+	private final InterfaceTypeExtensionRegistry interfaceExtensions;
 
 	private final ObjectTypeRegistry objects;
 	private final ObjectTypeExtensionRegistry objectExtensions;
+
+	private final UnionTypeRegistry unions;
 
 	private final QueryRegistry queries;
 	private final MutationRegistry mutations;
@@ -65,10 +67,12 @@ public class GraphRegistry {
 		this.inputObjects = new InputObjectTypeRegistry(this);
 
 		this.interfaces = new InterfaceTypeRegistry(this);
-		this.unions = new UnionTypeRegistry(this);
+		this.interfaceExtensions = new InterfaceTypeExtensionRegistry(this);
 
 		this.objects = new ObjectTypeRegistry(this);
 		this.objectExtensions = new ObjectTypeExtensionRegistry(this);
+
+		this.unions = new UnionTypeRegistry(this);
 
 		this.queries = new QueryRegistry(this);
 		this.mutations = new MutationRegistry(this);
@@ -199,6 +203,10 @@ public class GraphRegistry {
 
 	public ObjectTypeExtensionRegistry getObjectExtensions() {
 		return objectExtensions;
+	}
+
+	public InterfaceTypeExtensionRegistry getInterfaceExtensions() {
+		return interfaceExtensions;
 	}
 
 	public QueryRegistry getQueries() {

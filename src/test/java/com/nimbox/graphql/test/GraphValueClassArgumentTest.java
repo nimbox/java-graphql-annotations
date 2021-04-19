@@ -53,9 +53,9 @@ class GraphValueClassArgumentTest {
 
 		assertEquals(String.class, returnClass.getType());
 		assertTrue(returnClass.isId());
-		assertFalse(returnClass.isOptional());
+		assertFalse(returnClass.hasOptional());
 		assertFalse(returnClass.isList());
-		assertFalse(returnClass.isOptionalList());
+		assertFalse(returnClass.hasOptionalList());
 
 	}
 
@@ -76,9 +76,9 @@ class GraphValueClassArgumentTest {
 
 		assertEquals(Integer.class, returnClass.getType());
 		assertTrue(returnClass.isId());
-		assertFalse(returnClass.isOptional());
+		assertFalse(returnClass.hasOptional());
 		assertFalse(returnClass.isList());
-		assertFalse(returnClass.isOptionalList());
+		assertFalse(returnClass.hasOptionalList());
 
 	}
 
@@ -101,9 +101,9 @@ class GraphValueClassArgumentTest {
 
 		assertEquals(String.class, returnClass.getType());
 		assertFalse(returnClass.isId());
-		assertFalse(returnClass.isOptional());
+		assertFalse(returnClass.hasOptional());
 		assertFalse(returnClass.isList());
-		assertFalse(returnClass.isOptionalList());
+		assertFalse(returnClass.hasOptionalList());
 
 	}
 
@@ -123,9 +123,9 @@ class GraphValueClassArgumentTest {
 
 		assertEquals(String.class, returnClass.getType());
 		assertFalse(returnClass.isId());
-		assertTrue(returnClass.isOptional());
+		assertTrue(returnClass.hasOptional());
 		assertFalse(returnClass.isList());
-		assertFalse(returnClass.isOptionalList());
+		assertFalse(returnClass.hasOptionalList());
 
 	}
 
@@ -145,9 +145,9 @@ class GraphValueClassArgumentTest {
 
 		assertEquals(String.class, returnClass.getType());
 		assertFalse(returnClass.isId());
-		assertTrue(returnClass.isOptional());
+		assertTrue(returnClass.hasOptional());
 		assertFalse(returnClass.isList());
-		assertFalse(returnClass.isOptionalList());
+		assertFalse(returnClass.hasOptionalList());
 
 	}
 
@@ -170,9 +170,9 @@ class GraphValueClassArgumentTest {
 
 		assertEquals(String.class, returnClass.getType());
 		assertFalse(returnClass.isId());
-		assertFalse(returnClass.isOptional());
+		assertFalse(returnClass.hasOptional());
 		assertTrue(returnClass.isList());
-		assertFalse(returnClass.isOptionalList());
+		assertFalse(returnClass.hasOptionalList());
 
 	}
 
@@ -193,9 +193,9 @@ class GraphValueClassArgumentTest {
 
 		assertEquals(String.class, returnClass.getType());
 		assertFalse(returnClass.isId());
-		assertTrue(returnClass.isOptional());
+		assertTrue(returnClass.hasOptional());
 		assertTrue(returnClass.isList());
-		assertFalse(returnClass.isOptionalList());
+		assertFalse(returnClass.hasOptionalList());
 
 	}
 
@@ -216,9 +216,9 @@ class GraphValueClassArgumentTest {
 
 		assertEquals(String.class, returnClass.getType());
 		assertFalse(returnClass.isId());
-		assertTrue(returnClass.isOptional());
+		assertTrue(returnClass.hasOptional());
 		assertTrue(returnClass.isList());
-		assertFalse(returnClass.isOptionalList());
+		assertFalse(returnClass.hasOptionalList());
 
 	}
 
@@ -241,9 +241,9 @@ class GraphValueClassArgumentTest {
 
 		assertEquals(String.class, returnClass.getType());
 		assertFalse(returnClass.isId());
-		assertFalse(returnClass.isOptional());
+		assertFalse(returnClass.hasOptional());
 		assertTrue(returnClass.isList());
-		assertTrue(returnClass.isOptionalList());
+		assertTrue(returnClass.hasOptionalList());
 
 	}
 
@@ -264,9 +264,9 @@ class GraphValueClassArgumentTest {
 
 		assertEquals(String.class, returnClass.getType());
 		assertFalse(returnClass.isId());
-		assertTrue(returnClass.isOptional());
+		assertTrue(returnClass.hasOptional());
 		assertTrue(returnClass.isList());
-		assertTrue(returnClass.isOptionalList());
+		assertTrue(returnClass.hasOptionalList());
 
 	}
 
@@ -287,9 +287,9 @@ class GraphValueClassArgumentTest {
 
 		assertEquals(String.class, returnClass.getType());
 		assertFalse(returnClass.isId());
-		assertTrue(returnClass.isOptional());
+		assertTrue(returnClass.hasOptional());
 		assertTrue(returnClass.isList());
-		assertTrue(returnClass.isOptionalList());
+		assertTrue(returnClass.hasOptionalList());
 
 	}
 
@@ -312,9 +312,9 @@ class GraphValueClassArgumentTest {
 
 		assertEquals(String.class, returnClass.getType());
 		assertFalse(returnClass.isId());
-		assertFalse(returnClass.isOptional());
+		assertFalse(returnClass.hasOptional());
 		assertTrue(returnClass.isList());
-		assertTrue(returnClass.isOptionalList());
+		assertTrue(returnClass.hasOptionalList());
 
 	}
 
@@ -335,9 +335,9 @@ class GraphValueClassArgumentTest {
 
 		assertEquals(String.class, returnClass.getType());
 		assertFalse(returnClass.isId());
-		assertTrue(returnClass.isOptional());
+		assertTrue(returnClass.hasOptional());
 		assertTrue(returnClass.isList());
-		assertTrue(returnClass.isOptionalList());
+		assertTrue(returnClass.hasOptionalList());
 
 	}
 
@@ -358,9 +358,9 @@ class GraphValueClassArgumentTest {
 
 		assertEquals(String.class, returnClass.getType());
 		assertFalse(returnClass.isId());
-		assertTrue(returnClass.isOptional());
+		assertTrue(returnClass.hasOptional());
 		assertTrue(returnClass.isList());
-		assertTrue(returnClass.isOptionalList());
+		assertTrue(returnClass.hasOptionalList());
 
 	}
 
@@ -390,9 +390,9 @@ class GraphValueClassArgumentTest {
 
 		assertEquals(Input.class, returnClass.getType());
 		assertFalse(returnClass.isId());
-		assertFalse(returnClass.isOptional());
+		assertFalse(returnClass.hasOptional());
 		assertFalse(returnClass.isList());
-		assertFalse(returnClass.isOptionalList());
+		assertFalse(returnClass.hasOptionalList());
 
 	}
 
@@ -412,9 +412,9 @@ class GraphValueClassArgumentTest {
 
 		assertEquals(Input.class, returnClass.getType());
 		assertFalse(returnClass.isId());
-		assertTrue(returnClass.isOptional());
+		assertTrue(returnClass.hasOptional());
 		assertFalse(returnClass.isList());
-		assertFalse(returnClass.isOptionalList());
+		assertFalse(returnClass.hasOptionalList());
 
 	}
 
@@ -434,9 +434,9 @@ class GraphValueClassArgumentTest {
 
 		assertEquals(Input.class, returnClass.getType());
 		assertFalse(returnClass.isId());
-		assertTrue(returnClass.isOptional());
+		assertTrue(returnClass.hasOptional());
 		assertFalse(returnClass.isList());
-		assertFalse(returnClass.isOptionalList());
+		assertFalse(returnClass.hasOptionalList());
 
 	}
 

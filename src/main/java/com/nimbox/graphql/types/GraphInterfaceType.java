@@ -1,8 +1,11 @@
 package com.nimbox.graphql.types;
 
+import static com.nimbox.graphql.utils.IntrospectionUtils.getAllInterfaces;
+import static com.nimbox.graphql.utils.IntrospectionUtils.getAllSuperclasses;
+
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -18,13 +21,14 @@ public class GraphInterfaceType {
 
 	private final Class<?> container;
 
-	private final List<GraphObjectType> implementations = new ArrayList<GraphObjectType>();
+	private final List<GraphInterfaceType> interfaces = new ArrayList<>();
+	private final List<GraphObjectType> implementations = new ArrayList<>();
 
 	private final String name;
 	private final String description;
 	private final List<String> order;
 
-	private final Map<Method, GraphInterfaceTypeField> fields = new HashMap<Method, GraphInterfaceTypeField>();
+	private final Map<Method, GraphInterfaceTypeField> fields = new LinkedHashMap<>();
 
 	// constructors
 
@@ -37,6 +41,28 @@ public class GraphInterfaceType {
 		this.name = registry.name(data.getName(), container);
 		this.description = data.getDescription();
 		this.order = data.getOrder();
+
+		// extends interface
+
+		for (Class<?> c : getAllSuperclasses(container)) {
+
+			if (registry.getInterfaces().acceptType(c)) {
+				GraphInterfaceType interfaceType = registry.getInterfaces().compute(c);
+				interfaces.add(interfaceType);
+			}
+
+		}
+
+		// implements interfaces
+
+		for (Class<?> c : getAllInterfaces(container)) {
+
+			if (registry.getInterfaces().acceptType(c)) {
+				GraphInterfaceType interfaceType = registry.getInterfaces().compute(c);
+				interfaces.add(interfaceType);
+			}
+
+		}
 
 		// fields
 
@@ -78,6 +104,10 @@ public class GraphInterfaceType {
 
 	public void addImplementation(GraphObjectType objectType) {
 		implementations.add(objectType);
+	}
+
+	public List<GraphInterfaceType> getInterfaces() {
+		return interfaces;
 	}
 
 	public List<GraphObjectType> getImplementations() {

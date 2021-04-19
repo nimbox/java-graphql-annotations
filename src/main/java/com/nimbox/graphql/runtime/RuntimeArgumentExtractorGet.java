@@ -37,8 +37,8 @@ class RuntimeArgumentExtractorGet implements RuntimeArgumentExtractor {
 
 		if (definition.isList()) {
 			List<Object> list = new ArrayList<Object>(((List<?>) value).size());
-			if (definition.isOptionalList()) {
-				if (definition.isOptional()) {
+			if (definition.hasOptionalList()) {
+				if (definition.hasOptional()) {
 					for (Object a : (List<?>) value) {
 						list.add(definition.nullable(a));
 					}
@@ -49,7 +49,7 @@ class RuntimeArgumentExtractorGet implements RuntimeArgumentExtractor {
 				}
 				return definition.nullableList(value);
 			} else {
-				if (definition.isOptional()) {
+				if (definition.hasOptional()) {
 					for (Object a : (List<?>) value) {
 						list.add(definition.nullable(a));
 					}
@@ -59,7 +59,7 @@ class RuntimeArgumentExtractorGet implements RuntimeArgumentExtractor {
 				return list;
 			}
 		} else {
-			if (definition.isOptional()) {
+			if (definition.hasOptional()) {
 				return definition.nullable(value);
 			} else {
 				return value;

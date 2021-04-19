@@ -15,8 +15,12 @@ public class GraphWrappedTypeDefinition extends GraphTypeDefinition {
 
 	final boolean isId;
 
+	final boolean isNotNull;
 	final Class<?> optionalType;
+
 	final Class<?> listType;
+
+	final boolean isListNotNull;
 	final Class<?> optionalListType;
 
 	// constructors
@@ -26,8 +30,12 @@ public class GraphWrappedTypeDefinition extends GraphTypeDefinition {
 
 		this.isId = builder.isId;
 
+		this.isNotNull = builder.isNotNull;
 		this.optionalType = builder.optionalType;
+
 		this.listType = builder.listType;
+
+		this.isListNotNull = true;
 		this.optionalListType = builder.optionalListType;
 
 	}
@@ -38,7 +46,11 @@ public class GraphWrappedTypeDefinition extends GraphTypeDefinition {
 		return isId;
 	}
 
-	public boolean isOptional() {
+	public boolean isNotNull() {
+		return isNotNull;
+	}
+
+	public boolean hasOptional() {
 		return optionalType != null;
 	}
 
@@ -46,7 +58,11 @@ public class GraphWrappedTypeDefinition extends GraphTypeDefinition {
 		return listType != null;
 	}
 
-	public boolean isOptionalList() {
+	public boolean isListNotNull() {
+		return isListNotNull;
+	}
+
+	public boolean hasOptionalList() {
 		return optionalListType != null;
 	}
 
@@ -58,13 +74,13 @@ public class GraphWrappedTypeDefinition extends GraphTypeDefinition {
 
 		List<String> types = new ArrayList<String>();
 
-		if (isOptionalList()) {
+		if (hasOptionalList()) {
 			types.add("Optional");
 		}
 		if (isList()) {
 			types.add("List");
 		}
-		if (isOptional()) {
+		if (hasOptional()) {
 			types.add("Optional");
 		}
 		types.add(type.getTypeName());

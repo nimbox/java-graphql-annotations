@@ -5,7 +5,7 @@ import static com.nimbox.graphql.utils.IntrospectionUtils.getAllSuperclasses;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -18,14 +18,14 @@ public class GraphObjectType {
 
 	private final Class<?> container;
 
-	private final List<GraphInterfaceType> interfaces = new ArrayList<GraphInterfaceType>();
-	private final List<GraphUnionType> unions = new ArrayList<GraphUnionType>();
+	private final List<GraphInterfaceType> interfaces = new ArrayList<>();
+	private final List<GraphUnionType> unions = new ArrayList<>();
 
 	private final String name;
 	private final String description;
 	private final List<String> order;
 
-	private final Map<Method, GraphObjectTypeField> fields = new HashMap<Method, GraphObjectTypeField>();
+	private final Map<Method, GraphObjectTypeField> fields = new LinkedHashMap<>();
 
 	// constructors
 
@@ -48,7 +48,7 @@ public class GraphObjectType {
 				interfaceType.addImplementation(this);
 				interfaces.add(interfaceType);
 			}
-
+			
 		}
 
 		// implements interfaces and unions

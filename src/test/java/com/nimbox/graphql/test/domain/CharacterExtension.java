@@ -4,9 +4,9 @@ import java.util.Collections;
 import java.util.List;
 
 import com.nimbox.graphql.annotations.GraphQLField;
-import com.nimbox.graphql.annotations.GraphQLTypeExtension;
+import com.nimbox.graphql.annotations.GraphQLExtension;
 
-@GraphQLTypeExtension(type = Human.class)
+@GraphQLExtension(type = Human.class)
 public class CharacterExtension {
 
 	private final Human human;

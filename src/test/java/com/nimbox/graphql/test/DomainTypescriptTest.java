@@ -31,7 +31,7 @@ import graphql.GraphQL;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.GraphQLSchema;
 
-class DomainSchemaTest {
+class DomainTypescriptTest {
 
 	static final String ARGUMENT = "argument";
 
@@ -54,7 +54,6 @@ class DomainSchemaTest {
 		builder.withScalars(InstantScalar.class);
 		builder.withScalars(LocalDateTimeScalar.class);
 
-		
 		builder.withOptional(Alternative.class, Alternative::undefined, Alternative::ofNullable);
 
 		builder.withObjectExtractor( //
@@ -164,20 +163,8 @@ class DomainSchemaTest {
 
 		builder.withOperations(HumanOperations.class);
 
-		GraphQLSchema schema = builder.build();
-		GraphUtils.printSchema(schema);
-		GraphQL graphQL = GraphQL.newGraphQL(schema).build();
-
-		ExecutionResult result = graphQL.execute("{ getCharacter(id: 999) { id name } }");
-//		ExecutionResult result = graphQL.execute("{ getHumans(limit: 123, age: 22) { id name } }");
-//		ExecutionResult result = graphQL.execute("{ getHumanInput(input: { name: \"Ricardo\", address: \"Naco\" } ) { id name } }");
-
-//		ExecutionResult result = graphQL.execute("{ getHumansByEpisode(episode: NEWHOPE, age: 81) { getFriends { id name } } }");
-//		ExecutionResult result = graphQL.execute("{ getHumansByEpisode(episode: NEWHOPE) { getFriends { id name } } }");
-
-//		ExecutionResult result = graphQL.execute("mutation { createHuman(input: { name: \"Ricardo\", address: \"Naco\" }) { id name } }");
-
-		System.out.println(result);
+		String s = builder.buildTypescript();
+		System.out.println(s);
 
 	}
 

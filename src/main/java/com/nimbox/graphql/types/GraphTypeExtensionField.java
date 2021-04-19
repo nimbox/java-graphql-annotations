@@ -8,7 +8,7 @@ import com.nimbox.graphql.runtime.RuntimeSourceExtensionDataFetcher;
 
 import graphql.schema.DataFetcher;
 
-public class GraphObjectTypeExtensionField extends GraphObjectTypeField {
+public class GraphTypeExtensionField extends GraphObjectTypeField {
 
 	// properties
 
@@ -16,7 +16,7 @@ public class GraphObjectTypeExtensionField extends GraphObjectTypeField {
 
 	// constructor
 
-	public GraphObjectTypeExtensionField(final GraphRegistry registry, final Class<?> container, final Method method, final Class<?> referenceContainer) {
+	public GraphTypeExtensionField(final GraphRegistry registry, final Class<?> container, final Method method, final Class<?> referenceContainer) {
 		super(registry, container, method);
 		this.referenceContainer = referenceContainer;
 	}

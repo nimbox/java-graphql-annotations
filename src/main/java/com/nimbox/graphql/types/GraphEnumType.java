@@ -18,7 +18,7 @@ public class GraphEnumType {
 	private final String description;
 	private final List<String> order;
 
-	private final Map<Field, GraphEnumTypeValue> values = new LinkedHashMap<Field, GraphEnumTypeValue>();
+	private final Map<Field, GraphEnumTypeValue> values = new LinkedHashMap<>();
 
 	// constructors
 
