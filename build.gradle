@@ -24,6 +24,7 @@ dependencies {
 
 	testImplementation group: 'com.nimbox', name: 'java-lomein', version: 'latest-release'
 	testImplementation group: 'com.nimbox', name: 'canexer-api', version: 'latest.release'
+	testImplementation group: 'jakarta.validation', name: 'jakarta.validation-api', version: '3.0.0'
 	
 	testImplementation group: 'org.antlr', name: 'antlr4-runtime', version: '4.8'
 

@@ -52,25 +52,23 @@ public class RuntimeArgumentExtractorProxy implements RuntimeArgumentExtractor {
 		}
 
 		Object value = arguments.get(name);
-		// Translate the string id not required since it is definitively an input that
-		// gets resolved to a proxy.
 
 		if (definition.isList()) {
 			List<Object> list = new ArrayList<Object>(((List<?>) value).size());
 			if (definition.hasOptionalList()) {
 				if (definition.hasOptional()) {
-					for (Object a : (List<?>) value) {
-						list.add(definition.nullable(proxy(container, factory, methods, (Map<String, Object>) a)));
+					for (Object element : (List<?>) value) {
+						list.add(definition.nullable(proxy(container, factory, methods, (Map<String, Object>) element)));
 					}
 				} else {
-					for (Object a : (List<?>) value) {
-						list.add(proxy(container, factory, methods, (Map<String, Object>) a));
+					for (Object element : (List<?>) value) {
+						list.add(proxy(container, factory, methods, (Map<String, Object>) element));
 					}
 				}
-				return definition.nullableList(value);
+				return definition.nullableList(list);
 			} else {
-				for (Object a : (List<?>) value) {
-					list.add(proxy(container, factory, methods, (Map<String, Object>) a));
+				for (Object element : (List<?>) value) {
+					list.add(proxy(container, factory, methods, (Map<String, Object>) element));
 				}
 				return list;
 			}

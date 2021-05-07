@@ -49,12 +49,11 @@ class DomainSchemaTest {
 
 		builder.withIdExtractors(e -> e.isAnnotationPresent(Property.class) && e.getAnnotation(Property.class).id());
 		builder.withIdCoercing(Long.class, id -> id.toString(), s -> Long.valueOf(s));
-		builder.withNotNullExtractors(e -> e.isAnnotationPresent(Property.class) && e.getAnnotation(Property.class).required());
+		builder.withNotNullExtractors((m, t) -> m.isAnnotationPresent(Property.class) && m.getAnnotation(Property.class).required());
 
 		builder.withScalars(InstantScalar.class);
 		builder.withScalars(LocalDateTimeScalar.class);
 
-		
 		builder.withOptional(Alternative.class, Alternative::undefined, Alternative::ofNullable);
 
 		builder.withObjectExtractor( //

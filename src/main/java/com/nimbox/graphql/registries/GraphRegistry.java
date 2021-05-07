@@ -1,11 +1,14 @@
 package com.nimbox.graphql.registries;
 
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.AnnotatedType;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
 import com.nimbox.graphql.GraphBuilderException;
@@ -26,7 +29,7 @@ public class GraphRegistry {
 	private final List<Predicate<AnnotatedElement>> idExtractors = new ArrayList<>();
 	private final Map<Class<?>, IdCoercing<?>> idCoercings = new HashMap<>();
 
-	private final List<Predicate<AnnotatedElement>> notNullExtractors = new ArrayList<>();
+	private final List<NotNullPredicate> notNullExtractors = new ArrayList<>();
 	private final Map<Class<?>, GraphOptionalDefinition<?>> optionals = new HashMap<>();
 
 	// names
@@ -59,7 +62,7 @@ public class GraphRegistry {
 		this.withIdExtractor(c -> c.isAnnotationPresent(GraphQLId.class));
 		this.withIdCoercing(new IdCoercing<String>(String.class, id -> id, s -> s));
 
-		this.withNotNullExtractor(c -> c.isAnnotationPresent(GraphQLNotNull.class));
+		this.withNotNullExtractor((m, t) -> t.isAnnotationPresent(GraphQLNotNull.class));
 		this.withOptional(new GraphOptionalDefinition<>(Optional.class, () -> null, Optional::ofNullable));
 
 		this.scalars = new ScalarTypeRegistry(this);
@@ -98,7 +101,6 @@ public class GraphRegistry {
 	}
 
 	public boolean isId(AnnotatedElement element) {
-
 		for (Predicate<AnnotatedElement> p : idExtractors) {
 			if (p.test(element)) {
 				return true;
@@ -122,14 +124,14 @@ public class GraphRegistry {
 
 	//
 
-	public GraphRegistry withNotNullExtractor(Predicate<AnnotatedElement> predicate) {
+	public GraphRegistry withNotNullExtractor(NotNullPredicate predicate) {
 		notNullExtractors.add(predicate);
 		return this;
 	}
 
-	public boolean isNotNull(AnnotatedElement element) {
-		for (Predicate<AnnotatedElement> p : notNullExtractors) {
-			if (p.test(element)) {
+	public boolean isNotNull(Method method, AnnotatedType type) {
+		for (NotNullPredicate p : notNullExtractors) {
+			if (p.test(method, type)) {
 				return true;
 			}
 		}
@@ -215,6 +217,14 @@ public class GraphRegistry {
 
 	public MutationRegistry getMutations() {
 		return mutations;
+	}
+
+	//
+	//
+	//
+
+	public static interface NotNullPredicate extends BiPredicate<Method, AnnotatedType> {
+
 	}
 
 }

@@ -9,7 +9,7 @@ public class GraphOutputTypeDefinition extends GraphWrappedTypeDefinition {
 	// constructors
 
 	public GraphOutputTypeDefinition(final GraphRegistry registry, final Method method) {
-		super(new Builder(registry, method, method.getGenericReturnType()));
+		super(new Builder(registry, method, method.getAnnotatedReturnType()));
 	}
 
 }

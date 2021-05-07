@@ -20,11 +20,11 @@ public abstract class GraphParameter {
 	public static GraphParameter of(final GraphRegistry registry, final Method method, final Parameter parameter) {
 
 		if (parameter.isAnnotationPresent(GraphQLArgument.class)) {
-			return new GraphParameterArgument(registry, parameter);
+			return new GraphParameterArgument(registry, method, parameter);
 		}
 
 		if (parameter.isAnnotationPresent(GraphQLContext.class)) {
-			return new GraphParameterContext(registry, parameter);
+			return new GraphParameterContext(registry, method, parameter);
 		}
 
 		throw new GraphBuilderException(String.format( //

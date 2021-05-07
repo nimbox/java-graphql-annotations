@@ -23,13 +23,9 @@ import com.nimbox.graphql.types.GraphInterfaceType;
 import com.nimbox.graphql.types.GraphInterfaceTypeField;
 import com.nimbox.graphql.types.GraphObjectType;
 import com.nimbox.graphql.types.GraphObjectTypeField;
-import com.nimbox.graphql.utils.GraphUtils;
 import com.nimbox.util.Alternative;
 
-import graphql.ExecutionResult;
-import graphql.GraphQL;
 import graphql.schema.DataFetchingEnvironment;
-import graphql.schema.GraphQLSchema;
 
 class DomainTypescriptTest {
 
@@ -49,7 +45,7 @@ class DomainTypescriptTest {
 
 		builder.withIdExtractors(e -> e.isAnnotationPresent(Property.class) && e.getAnnotation(Property.class).id());
 		builder.withIdCoercing(Long.class, id -> id.toString(), s -> Long.valueOf(s));
-		builder.withNotNullExtractors(e -> e.isAnnotationPresent(Property.class) && e.getAnnotation(Property.class).required());
+		builder.withNotNullExtractors((m, t) -> m.isAnnotationPresent(Property.class) && m.getAnnotation(Property.class).required());
 
 		builder.withScalars(InstantScalar.class);
 		builder.withScalars(LocalDateTimeScalar.class);

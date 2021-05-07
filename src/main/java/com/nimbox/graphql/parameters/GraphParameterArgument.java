@@ -1,5 +1,6 @@
 package com.nimbox.graphql.parameters;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Optional;
 
@@ -20,13 +21,13 @@ public class GraphParameterArgument extends GraphParameter {
 
 	// constructors
 
-	GraphParameterArgument(final GraphRegistry registry, final Parameter parameter) {
+	GraphParameterArgument(final GraphRegistry registry, final Method method, final Parameter parameter) {
 
 		GraphQLArgument annotation = parameter.getAnnotation(GraphQLArgument.class);
-		
+
 		this.name = annotation.name();
 		this.description = ReservedStringUtils.translate(annotation.description());
-		this.input = GraphInput.of(registry, this.name, parameter);
+		this.input = GraphInput.of(registry, this.name, method, parameter);
 
 	}
 

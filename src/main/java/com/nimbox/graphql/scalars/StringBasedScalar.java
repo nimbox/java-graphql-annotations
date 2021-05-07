@@ -21,7 +21,6 @@ public class StringBasedScalar<T> implements Coercing<T, String> {
 	@Override
 	@SuppressWarnings("unchecked")
 	public String serialize(Object dataFetcherResult) throws CoercingSerializeException {
-
 		if (type.isInstance(dataFetcherResult)) {
 			try {
 				return toString.apply((T) dataFetcherResult);
@@ -30,12 +29,10 @@ public class StringBasedScalar<T> implements Coercing<T, String> {
 			}
 		}
 		throw new CoercingSerializeException(String.format("Value %s could not be serialized from a %s", dataFetcherResult, type));
-
 	}
 
 	@Override
 	public T parseValue(Object input) throws CoercingParseValueException {
-
 		try {
 			if (input instanceof String) {
 				return fromString.apply((String) input);
@@ -44,7 +41,6 @@ public class StringBasedScalar<T> implements Coercing<T, String> {
 		} catch (Exception e) {
 			throw new CoercingParseValueException(String.format("Value %s could not be parsed into a %s", input, type), e);
 		}
-
 	}
 
 	@Override

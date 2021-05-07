@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.nimbox.canexer.api.locals.User;
 import com.nimbox.graphql.GraphBuilderException;
 
 import graphql.schema.GraphQLTypeReference;
@@ -91,6 +92,10 @@ public abstract class TypeRegistry<T, C, D> {
 
 		if (data.containsKey(container)) {
 			return data.get(container);
+		}
+		
+		if (container.toString().contains("User")) {
+			System.out.println("is user");
 		}
 
 		T type = createType(container);

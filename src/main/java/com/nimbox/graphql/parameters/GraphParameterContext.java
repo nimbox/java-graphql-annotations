@@ -1,5 +1,6 @@
 package com.nimbox.graphql.parameters;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
 import com.nimbox.graphql.annotations.GraphQLContext;
@@ -18,7 +19,7 @@ public class GraphParameterContext extends GraphParameter {
 
 	// constructors
 
-	GraphParameterContext(final GraphRegistry registry, final Parameter parameter) {
+	GraphParameterContext(final GraphRegistry registry, final Method method, final Parameter parameter) {
 
 		GraphQLContext annotation = parameter.getAnnotation(GraphQLContext.class);
 

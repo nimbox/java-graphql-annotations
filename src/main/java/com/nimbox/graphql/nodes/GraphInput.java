@@ -48,11 +48,11 @@ public abstract class GraphInput {
 	}
 
 	public static GraphInput of(final GraphRegistry registry, final String name, final Method method) {
-		return of(registry, name, new GraphInputTypeDefinition(registry, method, method.getGenericReturnType()));
+		return of(registry, name, new GraphInputTypeDefinition(registry, method, method.getAnnotatedReturnType()));
 	}
 
-	public static GraphInput of(final GraphRegistry registry, final String name, final Parameter parameter) {
-		return of(registry, name, new GraphInputTypeDefinition(registry, parameter, parameter.getParameterizedType()));
+	public static GraphInput of(final GraphRegistry registry, final String name, final Method method, final Parameter parameter) {
+		return of(registry, name, new GraphInputTypeDefinition(registry, method, parameter.getAnnotatedType()));
 	}
 
 	// getters

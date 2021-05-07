@@ -1,7 +1,7 @@
 package com.nimbox.graphql.definitions;
 
-import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Type;
+import java.lang.reflect.AnnotatedType;
+import java.lang.reflect.Method;
 
 import com.nimbox.graphql.registries.GraphRegistry;
 import com.nimbox.graphql.registries.IdCoercing;
@@ -20,18 +20,12 @@ public class GraphInputTypeDefinition extends GraphWrappedTypeDefinition {
 
 	final IdCoercing<?> idCoercing;
 
-	final GraphOptionalDefinition<?> optionalDefinition;
-	final GraphOptionalDefinition<?> optionalListDefinition;
-
 	// constructors
 
-	public GraphInputTypeDefinition(final GraphRegistry registry, final AnnotatedElement element, final Type parameterizedType) {
-		super(new Builder(registry, element, parameterizedType));
+	public GraphInputTypeDefinition(final GraphRegistry registry, final Method method, final AnnotatedType type) {
+		super(new Builder(registry, method, type));
 
 		this.idCoercing = isId() ? registry.getIdCoercing(getType()) : null;
-
-		this.optionalDefinition = registry.getOptionalDefinition(this.optionalType);
-		this.optionalListDefinition = registry.getOptionalDefinition(this.optionalListType);
 
 	}
 
@@ -44,19 +38,19 @@ public class GraphInputTypeDefinition extends GraphWrappedTypeDefinition {
 	// methods
 
 	public Object undefined() {
-		return optionalDefinition.undefined().get();
+		return getOptionalDefinition().undefined().get();
 	}
 
 	public Object nullable(Object value) {
-		return optionalDefinition.nullable().apply(value);
+		return getOptionalDefinition().nullable().apply(value);
 	}
 
 	public Object undefinedList() {
-		return optionalListDefinition.undefined().get();
+		return getOptionalListDefinition().undefined().get();
 	}
 
 	public Object nullableList(Object value) {
-		return optionalListDefinition.nullable().apply(value);
+		return getOptionalListDefinition().nullable().apply(value);
 	}
 
 }

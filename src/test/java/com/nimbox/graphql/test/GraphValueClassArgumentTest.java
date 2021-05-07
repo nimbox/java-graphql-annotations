@@ -49,7 +49,7 @@ class GraphValueClassArgumentTest {
 		Class<?> klass = k.getClass();
 		Method method = Arrays.stream(klass.getMethods()).filter(m -> m.getName().equals("method")).findFirst().get();
 		Parameter parameter = method.getParameters()[0];
-		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry, parameter, parameter.getParameterizedType());
+		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry,  method, parameter.getAnnotatedType());
 
 		assertEquals(String.class, returnClass.getType());
 		assertTrue(returnClass.isId());
@@ -64,7 +64,7 @@ class GraphValueClassArgumentTest {
 
 		Object k = new Object() {
 			@SuppressWarnings("unused")
-			public String method(@GraphQLArgument(name = ARGUMENT) @GraphQLId Integer argument) {
+			public String method(@GraphQLArgument(name = ARGUMENT) Integer argument) {
 				return "Hello";
 			}
 		};
@@ -72,10 +72,10 @@ class GraphValueClassArgumentTest {
 		Class<?> klass = k.getClass();
 		Method method = Arrays.stream(klass.getMethods()).filter(m -> m.getName().equals("method")).findFirst().get();
 		Parameter parameter = method.getParameters()[0];
-		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry, parameter, parameter.getParameterizedType());
+		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry,  method, parameter.getAnnotatedType());
 
 		assertEquals(Integer.class, returnClass.getType());
-		assertTrue(returnClass.isId());
+		assertFalse(returnClass.isId());
 		assertFalse(returnClass.hasOptional());
 		assertFalse(returnClass.isList());
 		assertFalse(returnClass.hasOptionalList());
@@ -97,7 +97,7 @@ class GraphValueClassArgumentTest {
 		Class<?> klass = k.getClass();
 		Method method = Arrays.stream(klass.getMethods()).filter(m -> m.getName().equals("method")).findFirst().get();
 		Parameter parameter = method.getParameters()[0];
-		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry, parameter, parameter.getParameterizedType());
+		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry,  method, parameter.getAnnotatedType());
 
 		assertEquals(String.class, returnClass.getType());
 		assertFalse(returnClass.isId());
@@ -119,7 +119,7 @@ class GraphValueClassArgumentTest {
 		Class<?> klass = k.getClass();
 		Method method = Arrays.stream(klass.getMethods()).filter(m -> m.getName().equals("method")).findFirst().get();
 		Parameter parameter = method.getParameters()[0];
-		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry, parameter, parameter.getParameterizedType());
+		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry,  method, parameter.getAnnotatedType());
 
 		assertEquals(String.class, returnClass.getType());
 		assertFalse(returnClass.isId());
@@ -141,7 +141,7 @@ class GraphValueClassArgumentTest {
 		Class<?> klass = k.getClass();
 		Method method = Arrays.stream(klass.getMethods()).filter(m -> m.getName().equals("method")).findFirst().get();
 		Parameter parameter = method.getParameters()[0];
-		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry, parameter, parameter.getParameterizedType());
+		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry,  method, parameter.getAnnotatedType());
 
 		assertEquals(String.class, returnClass.getType());
 		assertFalse(returnClass.isId());
@@ -166,7 +166,7 @@ class GraphValueClassArgumentTest {
 		Class<?> klass = k.getClass();
 		Method method = Arrays.stream(klass.getMethods()).filter(m -> m.getName().equals("method")).findFirst().get();
 		Parameter parameter = method.getParameters()[0];
-		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry, parameter, parameter.getParameterizedType());
+		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry,  method, parameter.getAnnotatedType());
 
 		assertEquals(String.class, returnClass.getType());
 		assertFalse(returnClass.isId());
@@ -189,7 +189,7 @@ class GraphValueClassArgumentTest {
 		Class<?> klass = k.getClass();
 		Method method = Arrays.stream(klass.getMethods()).filter(m -> m.getName().equals("method")).findFirst().get();
 		Parameter parameter = method.getParameters()[0];
-		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry, parameter, parameter.getParameterizedType());
+		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry,  method, parameter.getAnnotatedType());
 
 		assertEquals(String.class, returnClass.getType());
 		assertFalse(returnClass.isId());
@@ -212,7 +212,7 @@ class GraphValueClassArgumentTest {
 		Class<?> klass = k.getClass();
 		Method method = Arrays.stream(klass.getMethods()).filter(m -> m.getName().equals("method")).findFirst().get();
 		Parameter parameter = method.getParameters()[0];
-		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry, parameter, parameter.getParameterizedType());
+		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry,  method, parameter.getAnnotatedType());
 
 		assertEquals(String.class, returnClass.getType());
 		assertFalse(returnClass.isId());
@@ -237,12 +237,14 @@ class GraphValueClassArgumentTest {
 		Class<?> klass = k.getClass();
 		Method method = Arrays.stream(klass.getMethods()).filter(m -> m.getName().equals("method")).findFirst().get();
 		Parameter parameter = method.getParameters()[0];
-		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry, parameter, parameter.getParameterizedType());
+		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry,  method, parameter.getAnnotatedType());
 
 		assertEquals(String.class, returnClass.getType());
 		assertFalse(returnClass.isId());
+		assertTrue(returnClass.isNotNull());
 		assertFalse(returnClass.hasOptional());
 		assertTrue(returnClass.isList());
+		assertFalse(returnClass.isListNotNull());
 		assertTrue(returnClass.hasOptionalList());
 
 	}
@@ -260,7 +262,7 @@ class GraphValueClassArgumentTest {
 		Class<?> klass = k.getClass();
 		Method method = Arrays.stream(klass.getMethods()).filter(m -> m.getName().equals("method")).findFirst().get();
 		Parameter parameter = method.getParameters()[0];
-		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry, parameter, parameter.getParameterizedType());
+		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry,  method, parameter.getAnnotatedType());
 
 		assertEquals(String.class, returnClass.getType());
 		assertFalse(returnClass.isId());
@@ -283,7 +285,7 @@ class GraphValueClassArgumentTest {
 		Class<?> klass = k.getClass();
 		Method method = Arrays.stream(klass.getMethods()).filter(m -> m.getName().equals("method")).findFirst().get();
 		Parameter parameter = method.getParameters()[0];
-		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry, parameter, parameter.getParameterizedType());
+		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry,  method, parameter.getAnnotatedType());
 
 		assertEquals(String.class, returnClass.getType());
 		assertFalse(returnClass.isId());
@@ -308,7 +310,7 @@ class GraphValueClassArgumentTest {
 		Class<?> klass = k.getClass();
 		Method method = Arrays.stream(klass.getMethods()).filter(m -> m.getName().equals("method")).findFirst().get();
 		Parameter parameter = method.getParameters()[0];
-		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry, parameter, parameter.getParameterizedType());
+		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry,  method, parameter.getAnnotatedType());
 
 		assertEquals(String.class, returnClass.getType());
 		assertFalse(returnClass.isId());
@@ -331,7 +333,7 @@ class GraphValueClassArgumentTest {
 		Class<?> klass = k.getClass();
 		Method method = Arrays.stream(klass.getMethods()).filter(m -> m.getName().equals("method")).findFirst().get();
 		Parameter parameter = method.getParameters()[0];
-		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry, parameter, parameter.getParameterizedType());
+		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry,  method, parameter.getAnnotatedType());
 
 		assertEquals(String.class, returnClass.getType());
 		assertFalse(returnClass.isId());
@@ -354,7 +356,7 @@ class GraphValueClassArgumentTest {
 		Class<?> klass = k.getClass();
 		Method method = Arrays.stream(klass.getMethods()).filter(m -> m.getName().equals("method")).findFirst().get();
 		Parameter parameter = method.getParameters()[0];
-		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry, parameter, parameter.getParameterizedType());
+		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry,  method, parameter.getAnnotatedType());
 
 		assertEquals(String.class, returnClass.getType());
 		assertFalse(returnClass.isId());
@@ -386,7 +388,7 @@ class GraphValueClassArgumentTest {
 		Class<?> klass = k.getClass();
 		Method method = Arrays.stream(klass.getMethods()).filter(m -> m.getName().equals("method")).findFirst().get();
 		Parameter parameter = method.getParameters()[0];
-		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry, parameter, parameter.getParameterizedType());
+		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry,  method, parameter.getAnnotatedType());
 
 		assertEquals(Input.class, returnClass.getType());
 		assertFalse(returnClass.isId());
@@ -408,7 +410,7 @@ class GraphValueClassArgumentTest {
 		Class<?> klass = k.getClass();
 		Method method = Arrays.stream(klass.getMethods()).filter(m -> m.getName().equals("method")).findFirst().get();
 		Parameter parameter = method.getParameters()[0];
-		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry, parameter, parameter.getParameterizedType());
+		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry,  method, parameter.getAnnotatedType());
 
 		assertEquals(Input.class, returnClass.getType());
 		assertFalse(returnClass.isId());
@@ -430,7 +432,7 @@ class GraphValueClassArgumentTest {
 		Class<?> klass = k.getClass();
 		Method method = Arrays.stream(klass.getMethods()).filter(m -> m.getName().equals("method")).findFirst().get();
 		Parameter parameter = method.getParameters()[0];
-		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry, parameter, parameter.getParameterizedType());
+		GraphInputTypeDefinition returnClass = new GraphInputTypeDefinition(registry, method, parameter.getAnnotatedType());
 
 		assertEquals(Input.class, returnClass.getType());
 		assertFalse(returnClass.isId());

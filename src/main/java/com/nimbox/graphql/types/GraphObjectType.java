@@ -48,7 +48,7 @@ public class GraphObjectType {
 				interfaceType.addImplementation(this);
 				interfaces.add(interfaceType);
 			}
-			
+
 		}
 
 		// implements interfaces and unions
@@ -71,10 +71,24 @@ public class GraphObjectType {
 
 		// fields
 
-		for (Method method : container.getMethods()) {
-			if (registry.getObjects().acceptTypeField(container, method)) {
-				fields.put(method, new GraphObjectTypeField(registry, container, method));
+		try {
+
+			for (Method method : container.getMethods()) {
+
+				System.out.println(method);
+
+				if (registry.getObjects().acceptTypeField(container, method)) {
+
+					if (method.toString().contains("getId()")) {
+						System.out.println("has getId()");
+					}
+
+					fields.put(method, new GraphObjectTypeField(registry, container, method));
+				}
 			}
+
+		} catch (Throwable e) {
+			e.printStackTrace();
 		}
 
 	}

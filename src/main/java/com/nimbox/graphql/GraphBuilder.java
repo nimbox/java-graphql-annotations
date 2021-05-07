@@ -24,6 +24,7 @@ import com.nimbox.graphql.definitions.GraphOptionalDefinition;
 import com.nimbox.graphql.registries.ClassExtractor;
 import com.nimbox.graphql.registries.ClassFieldExtractor;
 import com.nimbox.graphql.registries.GraphRegistry;
+import com.nimbox.graphql.registries.GraphRegistry.NotNullPredicate;
 import com.nimbox.graphql.registries.IdCoercing;
 import com.nimbox.graphql.registries.IdCoercing.ParseFunction;
 import com.nimbox.graphql.registries.IdCoercing.SerializeFunction;
@@ -65,7 +66,7 @@ public class GraphBuilder {
 	private final List<Predicate<AnnotatedElement>> idExtractors = new ArrayList<>();
 	private final Map<Class<?>, IdCoercing<?>> idCoercings = new HashMap<>();
 
-	private final List<Predicate<AnnotatedElement>> notNullExtractors = new ArrayList<>();
+	private final List<NotNullPredicate> notNullExtractors = new ArrayList<>();
 	private List<GraphOptionalDefinition<?>> optionals = new ArrayList<>();
 
 	private final List<ClassExtractor<Class<?>, GraphInterfaceType.Data>> interfaceExtractors = new ArrayList<>();
@@ -130,11 +131,11 @@ public class GraphBuilder {
 	// not nulls
 
 	@SafeVarargs
-	public final GraphBuilder withNotNullExtractors(Predicate<AnnotatedElement>... predicates) {
+	public final GraphBuilder withNotNullExtractors(NotNullPredicate... predicates) {
 		return withNotNull(Arrays.asList(predicates));
 	}
 
-	public final GraphBuilder withNotNull(List<Predicate<AnnotatedElement>> predicates) {
+	public final GraphBuilder withNotNull(List<NotNullPredicate> predicates) {
 		this.notNullExtractors.addAll(predicates);
 		return this;
 	}

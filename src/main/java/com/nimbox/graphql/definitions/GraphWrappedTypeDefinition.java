@@ -1,9 +1,9 @@
 package com.nimbox.graphql.definitions;
 
-import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.AnnotatedParameterizedType;
+import java.lang.reflect.AnnotatedType;
+import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.List;
 
 import com.nimbox.graphql.GraphBuilderException;
@@ -11,36 +11,36 @@ import com.nimbox.graphql.registries.GraphRegistry;
 
 public class GraphWrappedTypeDefinition extends GraphTypeDefinition {
 
-	// properties
+	//
 
-	final boolean isId;
+	private final boolean isId;
+	private final boolean isNotNull;
+	private final GraphOptionalDefinition<?> optionalDefinition;
 
-	final boolean isNotNull;
-	final Class<?> optionalType;
+	private final Class<?> listType;
+	private final boolean isListNotNull;
+	private final GraphOptionalDefinition<?> optionalListDefinition;
 
-	final Class<?> listType;
-
-	final boolean isListNotNull;
-	final Class<?> optionalListType;
-
-	// constructors
+	//
 
 	GraphWrappedTypeDefinition(Builder builder) {
 		super(builder.type);
 
 		this.isId = builder.isId;
-
 		this.isNotNull = builder.isNotNull;
-		this.optionalType = builder.optionalType;
+		this.optionalDefinition = builder.optionalDefinition;
 
 		this.listType = builder.listType;
-
-		this.isListNotNull = true;
-		this.optionalListType = builder.optionalListType;
+		this.isListNotNull = builder.isListNotNull;
+		this.optionalListDefinition = builder.optionalListDefinition;
 
 	}
 
-	// getters
+	public GraphWrappedTypeDefinition(final GraphRegistry registry, final Method method, final AnnotatedType type) {
+		this(new Builder(registry, method, type));
+	}
+
+	// getters and setters
 
 	public boolean isId() {
 		return isId;
@@ -51,11 +51,19 @@ public class GraphWrappedTypeDefinition extends GraphTypeDefinition {
 	}
 
 	public boolean hasOptional() {
-		return optionalType != null;
+		return optionalDefinition != null;
+	}
+
+	public GraphOptionalDefinition<?> getOptionalDefinition() {
+		return optionalDefinition;
 	}
 
 	public boolean isList() {
 		return listType != null;
+	}
+
+	public Class<?> getListType() {
+		return listType;
 	}
 
 	public boolean isListNotNull() {
@@ -63,169 +71,123 @@ public class GraphWrappedTypeDefinition extends GraphTypeDefinition {
 	}
 
 	public boolean hasOptionalList() {
-		return optionalListType != null;
+		return optionalListDefinition != null;
 	}
 
-	// object overrides
-
-	public String toString() {
-
-		StringBuilder builder = new StringBuilder();
-
-		List<String> types = new ArrayList<String>();
-
-		if (hasOptionalList()) {
-			types.add("Optional");
-		}
-		if (isList()) {
-			types.add("List");
-		}
-		if (hasOptional()) {
-			types.add("Optional");
-		}
-		types.add(type.getTypeName());
-
-		return toString(builder, types).toString();
-
+	public GraphOptionalDefinition<?> getOptionalListDefinition() {
+		return optionalListDefinition;
 	}
 
-	private StringBuilder toString(StringBuilder builder, List<String> types) {
-
-		if (types.isEmpty()) {
-			return builder;
-		}
-
-		if (types.size() == 1) {
-			builder.append(types.get(0));
-			return builder;
-		}
-
-		builder.append(types.get(0)).append("<");
-		toString(builder, types.subList(1, types.size()));
-		builder.append(">");
-
-		return builder;
-
-	}
-
-	// builder
+	//
 
 	static class Builder {
+
+		final GraphRegistry registry;
+		final Method method;
+
+		// properties
 
 		Class<?> type;
 		boolean isId;
 		boolean isNotNull;
-
-		Class<?> optionalType = null;
+		GraphOptionalDefinition<?> optionalDefinition;
 
 		Class<?> listType = null;
-		Class<?> optionalListType = null;
+		boolean isListNotNull;
+		GraphOptionalDefinition<?> optionalListDefinition;
 
-		Builder(final GraphRegistry registry, final AnnotatedElement element, final Type type) {
+		// properties
 
-			this.isId = registry.isId(element);
-			this.isNotNull = registry.isNotNull(element);
+		private AnnotatedType currentType;
 
-			if (type instanceof ParameterizedType) {
-				checkOptionalOrList(registry, type);
+		// constructors
+
+		Builder(final GraphRegistry registry, final Method method, final AnnotatedType type) {
+
+			this.registry = registry;
+			this.method = method;
+
+			currentType = type;
+
+			if (currentType instanceof AnnotatedParameterizedType) {
+				consumeList(consumeOptional());
 			} else {
-				complete(registry, type);
+				consumeScalar(null);
 			}
 
 		}
 
-		private void checkOptionalOrList(final GraphRegistry registry, final Type type) {
+		//
 
-			ParameterizedType parameterized = (ParameterizedType) type;
+		private void consumeCurrent() {
 
-			if (registry.isOptional((Class<?>) parameterized.getRawType())) {
+			AnnotatedParameterizedType currentAnnotatedParameterized = (AnnotatedParameterizedType) currentType;
+			currentType = currentAnnotatedParameterized.getAnnotatedActualTypeArguments()[0];
 
-				Type current = parameterized.getActualTypeArguments()[0];
-				if (current instanceof ParameterizedType) {
-					optionalListType = (Class<?>) parameterized.getRawType();
-					checkList(registry, current);
+		}
+
+		private GraphOptionalDefinition<?> consumeOptional() {
+
+			if (currentType instanceof AnnotatedParameterizedType) {
+
+				ParameterizedType currentParameterized = (ParameterizedType) currentType.getType();
+				Class<?> currentClass = (Class<?>) currentParameterized.getRawType();
+
+				GraphOptionalDefinition<?> definition = registry.getOptionalDefinition(currentClass);
+				if (definition != null) {
+					consumeCurrent();
+					return definition;
+				}
+
+			}
+
+			return null;
+
+		}
+
+		//
+
+		private void consumeList(final GraphOptionalDefinition<?> optionalClass) {
+
+			if (currentType instanceof AnnotatedParameterizedType) {
+
+				ParameterizedType currentParameterized = (ParameterizedType) currentType.getType();
+				Class<?> currentClass = (Class<?>) currentParameterized.getRawType();
+
+				if (List.class.isAssignableFrom(currentClass)) {
+
+					listType = currentClass;
+					isListNotNull = registry.isNotNull(method, currentType);
+					optionalListDefinition = optionalClass;
+
+					consumeCurrent();
+					GraphOptionalDefinition<?> definition = consumeOptional();
+					if (!(currentType instanceof AnnotatedParameterizedType)) {
+						consumeScalar(definition);
+					} else {
+						throw new GraphBuilderException("Return type must be of a subset of Optional<List<Optional<T>>>");
+					}
+
 				} else {
-					optionalType = (Class<?>) parameterized.getRawType();
-					complete(registry, current);
+					throw new GraphBuilderException("Return type must be of a subset of Optional<List<Optional<T>>>");
 				}
 
-				return;
-
+			} else {
+				consumeScalar(optionalClass);
 			}
-
-			if (registry.isList((Class<?>) parameterized.getRawType())) {
-
-				listType = (Class<?>) parameterized.getRawType();
-
-				Type current = parameterized.getActualTypeArguments()[0];
-				if (current instanceof ParameterizedType) {
-					checkOptional(registry, current);
-				} else {
-					complete(registry, current);
-				}
-
-				return;
-
-			}
-
-			throw new GraphBuilderException("Return type must be of a subset of Optional<List<Optional<T>>>");
 
 		}
 
-		private void checkList(final GraphRegistry registry, final Type type) {
+		private void consumeScalar(final GraphOptionalDefinition<?> optionalClass) {
 
-			ParameterizedType parameterized = (ParameterizedType) type;
+			type = (Class<?>) currentType.getType();
+			isId = registry.isId(currentType);
+			isNotNull = registry.isNotNull(method, currentType);
+			optionalDefinition = optionalClass;
 
-			if (registry.isList((Class<?>) parameterized.getRawType())) {
-
-				listType = (Class<?>) parameterized.getRawType();
-
-				Type current = parameterized.getActualTypeArguments()[0];
-				if (current instanceof ParameterizedType) {
-					checkOptional(registry, current);
-				} else {
-					complete(registry, current);
-				}
-
-				return;
-
-			}
-
-			throw new GraphBuilderException("Return type must be of a subset of Optional<List<Optional<T>>>");
-
-		}
-
-		private void checkOptional(final GraphRegistry registry, final Type type) {
-
-			ParameterizedType parameterized = (ParameterizedType) type;
-
-			if (registry.isOptional((Class<?>) parameterized.getRawType())) {
-
-				optionalType = (Class<?>) parameterized.getRawType();
-
-				Type current = parameterized.getActualTypeArguments()[0];
-				if (!(current instanceof ParameterizedType)) {
-					complete(registry, current);
-					return;
-				}
-
-			}
-
-			throw new GraphBuilderException("Return type must be of a subset of Optional<List<Optional<T>>>");
-
-		}
-
-		private void complete(final GraphRegistry registry, final Type type) {
-
-			if (type.equals(Void.TYPE)) {
-				throw new GraphBuilderException("Return type must not be void");
-			}
-
-			if (this.isId && !registry.isIdType((Class<?>) type)) {
+			if (isId && !registry.isIdType((Class<?>) type)) {
 				throw new GraphBuilderException(String.format("Unrecognized id type %s", type));
 			}
-
-			this.type = (Class<?>) type;
 
 		}
 

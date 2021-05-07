@@ -30,41 +30,51 @@ class RuntimeArgumentExtractorGet implements RuntimeArgumentExtractor {
 		}
 
 		Object value = arguments.get(name);
-		// Translate the string id to an expected type.
-		if (definition.isId()) {
-			value = definition.parseId(value);
-		}
 
 		if (definition.isList()) {
 			List<Object> list = new ArrayList<Object>(((List<?>) value).size());
 			if (definition.hasOptionalList()) {
 				if (definition.hasOptional()) {
-					for (Object a : (List<?>) value) {
-						list.add(definition.nullable(a));
+					for (Object element : (List<?>) value) {
+						list.add(definition.nullable(translate(definition, element)));
 					}
 				} else {
-					for (Object a : (List<?>) value) {
-						list.add(a);
+					for (Object element : (List<?>) value) {
+						list.add(translate(definition, element));
 					}
 				}
 				return definition.nullableList(value);
 			} else {
 				if (definition.hasOptional()) {
-					for (Object a : (List<?>) value) {
-						list.add(definition.nullable(a));
+					for (Object element : (List<?>) value) {
+						list.add(definition.nullable(translate(definition, element)));
 					}
 				} else {
-					return value;
+					return translate(definition, value);
 				}
 				return list;
 			}
 		} else {
 			if (definition.hasOptional()) {
-				return definition.nullable(value);
+				return definition.nullable(translate(definition, value));
 			} else {
-				return value;
+				return translate(definition, value);
 			}
 		}
+
+	}
+
+	private Object translate(GraphInputTypeDefinition definition, Object value) {
+
+		if (value == null) {
+			return null;
+		}
+
+		if (definition.isId()) {
+			return definition.parseId(value);
+		}
+
+		return value;
 
 	}
 
