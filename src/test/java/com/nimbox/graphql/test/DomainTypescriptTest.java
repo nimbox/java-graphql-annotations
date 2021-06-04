@@ -159,7 +159,7 @@ class DomainTypescriptTest {
 
 		builder.withOperations(HumanOperations.class);
 
-		String s = builder.buildTypescript();
+		String s = builder.buildTypes();
 		System.out.println(s);
 
 	}

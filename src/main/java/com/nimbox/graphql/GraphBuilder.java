@@ -5,6 +5,11 @@ import static graphql.schema.GraphqlTypeComparatorRegistry.AS_IS_REGISTRY;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.net.URL;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -21,6 +26,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import com.nimbox.graphql.definitions.GraphOptionalDefinition;
+import com.nimbox.graphql.definitions.GraphWrappedTypeDefinition;
 import com.nimbox.graphql.registries.ClassExtractor;
 import com.nimbox.graphql.registries.ClassFieldExtractor;
 import com.nimbox.graphql.registries.GraphRegistry;
@@ -230,13 +236,8 @@ public class GraphBuilder {
 	}
 
 	public GraphBuilder withExtensions(List<Class<?>> extensions) {
-
-		System.out.println("ADDING EXTENSIONS...");
-		extensions.forEach(System.out::println);
-
 		this.extensions.addAll(extensions);
 		return this;
-
 	}
 
 	// unions
@@ -353,15 +354,79 @@ public class GraphBuilder {
 
 	}
 
-	public String buildTypescript() {
+	private static Map<Class<?>, String> TYPESCRIPT_TYPES = new HashMap<Class<?>, String>();
+	static {
+		
+		TYPESCRIPT_TYPES.put(String.class, "string");
+		TYPESCRIPT_TYPES.put(Long.class, "number");
+		TYPESCRIPT_TYPES.put(Integer.class, "number");
+		TYPESCRIPT_TYPES.put(Double.class, "number");
+		TYPESCRIPT_TYPES.put(Float.class, "number");
+		TYPESCRIPT_TYPES.put(BigDecimal.class, "number");
+		
+		TYPESCRIPT_TYPES.put(Instant.class, "Date");
+		TYPESCRIPT_TYPES.put(LocalDate.class, "Date");
+		TYPESCRIPT_TYPES.put(LocalDateTime.class, "Date");
+
+		TYPESCRIPT_TYPES.put(URL.class, "string");
+
+		
+	}
+
+	private String getTypescriptType(Class<?> type) {
+
+		String typescript = TYPESCRIPT_TYPES.get(type);
+		if (typescript != null) {
+			return typescript;
+		}
+		return type.getSimpleName();
+
+	}
+
+	private String getTypescriptOrAny(Class<?> type) {
+
+		String typescript = TYPESCRIPT_TYPES.get(type);
+		if (typescript != null) {
+			return typescript;
+		}
+		return "any";
+
+	}
+	
+	private StringBuilder getTypescriptType(GraphWrappedTypeDefinition definition) {
+
+		StringBuilder builder = new StringBuilder();
+
+		if (definition.isId()) {
+			builder.append("ID");
+		} else {
+			builder.append(getTypescriptType(definition.getType()));
+		}
+
+		if (definition.isList()) {
+			builder.append("[]");
+		}
+
+		return builder;
+
+	}
+
+	public String buildTypes() {
 
 		GraphRegistry registry = buildRegistry();
 
 		StringBuilder builder = new StringBuilder();
 
+		builder.append("export type ").append("ID").append(" = ").append("string").append(";").append("\n");
+
+		for (GraphScalarType scalar : registry.getScalars().all()) {
+			scalar.getReferenceContainer();
+			builder.append("export type ").append(scalar.getName()).append(" = ").append(getTypescriptOrAny(scalar.getReferenceContainer())).append(";").append("\n");
+		}
+
 		for (GraphInterfaceType interfaceType : registry.getInterfaces().all()) {
 
-			builder.append("interface ").append(interfaceType.getName());
+			builder.append("export interface ").append(interfaceType.getName());
 
 			if (!interfaceType.getInterfaces().isEmpty()) {
 				builder.append(" extends ");
@@ -371,8 +436,17 @@ public class GraphBuilder {
 
 			for (GraphInterfaceTypeField field : interfaceType.getFields().values()) {
 				builder.append("    ").append(field.getName()).append(": ");
-				builder.append(field.getReturn().getDefinition().getType().getSimpleName());
-				builder.append("\n");
+				builder.append(getTypescriptType(field.getReturn().getDefinition()));
+				builder.append(";").append("\n");
+			}
+
+			for (GraphInterfaceTypeExtension extension : registry.getInterfaceExtensions().getForType(interfaceType.getContainer())) {
+				for (GraphTypeExtensionField field : extension.getFields().values()) {
+					builder.append("    ").append(field.getName()).append(": ");
+					builder.append(getTypescriptType(field.getReturn().getDefinition()));
+					builder.append(";").append("\n");
+				}
+
 			}
 
 			builder.append("}").append("\n");
@@ -381,7 +455,7 @@ public class GraphBuilder {
 
 		for (GraphObjectType objectType : registry.getObjects().all()) {
 
-			builder.append("interface ").append(objectType.getName());
+			builder.append("export interface ").append(objectType.getName());
 
 			if (!objectType.getInterfaces().isEmpty()) {
 				builder.append(" extends ");
@@ -391,8 +465,17 @@ public class GraphBuilder {
 
 			for (GraphObjectTypeField field : objectType.getFields().values()) {
 				builder.append("    ").append(field.getName()).append(": ");
-				builder.append(field.getReturn().getDefinition().getType().getSimpleName());
-				builder.append("\n");
+				builder.append(getTypescriptType(field.getReturn().getDefinition()));
+				builder.append(";").append("\n");
+			}
+
+			for (GraphObjectTypeExtension extension : registry.getObjectExtensions().getForType(objectType.getContainer())) {
+				for (GraphObjectTypeField field : extension.getFields().values()) {
+					builder.append("    ").append(field.getName()).append(": ");
+					builder.append(getTypescriptType(field.getReturn().getDefinition()));
+					builder.append(";").append("\n");
+				}
+
 			}
 
 			builder.append("}").append("\n");
@@ -401,13 +484,13 @@ public class GraphBuilder {
 
 		for (GraphInputObjectType inputObject : registry.getInputObjects().all()) {
 
-			builder.append("interface ").append(inputObject.getName());
+			builder.append("export interface ").append(inputObject.getName());
 			builder.append(" {").append("\n");
 
 			for (GraphInputObjectTypeField field : inputObject.getFields().values()) {
 				builder.append("    ").append(field.getName()).append(": ");
-				builder.append(field.getReturnInput().getDefinition().getType().getSimpleName());
-				builder.append("\n");
+				builder.append(getTypescriptType(field.getReturnInput().getDefinition()));
+				builder.append(";").append("\n");
 			}
 
 			builder.append("}").append("\n");
