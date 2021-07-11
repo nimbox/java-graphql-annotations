@@ -356,21 +356,20 @@ public class GraphBuilder {
 
 	private static Map<Class<?>, String> TYPESCRIPT_TYPES = new HashMap<Class<?>, String>();
 	static {
-		
+
 		TYPESCRIPT_TYPES.put(String.class, "string");
 		TYPESCRIPT_TYPES.put(Long.class, "number");
 		TYPESCRIPT_TYPES.put(Integer.class, "number");
 		TYPESCRIPT_TYPES.put(Double.class, "number");
 		TYPESCRIPT_TYPES.put(Float.class, "number");
 		TYPESCRIPT_TYPES.put(BigDecimal.class, "number");
-		
+
 		TYPESCRIPT_TYPES.put(Instant.class, "Date");
 		TYPESCRIPT_TYPES.put(LocalDate.class, "Date");
 		TYPESCRIPT_TYPES.put(LocalDateTime.class, "Date");
 
 		TYPESCRIPT_TYPES.put(URL.class, "string");
 
-		
 	}
 
 	private String getTypescriptType(Class<?> type) {
@@ -392,7 +391,7 @@ public class GraphBuilder {
 		return "any";
 
 	}
-	
+
 	private StringBuilder getTypescriptType(GraphWrappedTypeDefinition definition) {
 
 		StringBuilder builder = new StringBuilder();
